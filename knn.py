@@ -176,7 +176,7 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 
 					#Initialize record ID (Iris data does not assign IDs)
 					record_id = 1
-					#Iterate over test records
+					#For each test record
 					for record in normalized_test:
 						kNearest = []
 
@@ -278,8 +278,84 @@ with open('income_te.csv', "rt") as income_test_data:
 						#Save normalized row
 						normalized_train.append([normal_age, normal_fnlwgt, normal_education, normal_gain, normal_loss, normal_hpw])
 
-					
 
-					#TODO drop education categorical
+					record_number = 1
+					#For each test record
+					for record in normalized_test:
+						#Retrieve corresponding row from full data set
+						income_record = income_test[record_number]
+
+						kNearest = []
+
+						#Initialize row ID
+						row_number = 1
+						#Compare test record to each row in training data set
+						for row in normalized_train:
+							#Retrieve corresponding row from full data set
+							income_row = income_train[row_number]
+
+							if iris_measure == "E":
+								#For continuous attributes, calculate Euclidean distance between current record and this row
+								euclidean = Euclidean(record, row)
+
+								#Compute dissimilarities for categorical attributes
+								workclass = Binary(income_record[2], income_row[2], False)
+								#Drop Education categorical attribute (index 4) since education_cat has already been included in continuous measurement
+								marital = Binary(income_record[6], income_row[6], False)
+								occupation = Binary(income_record[7], income_row[7], False)
+								relationship = Binary(income_record[8], income_row[8], False)
+								race = Binary(income_record[9], income_row[9], False)
+								gender = Binary(income_record[10], income_row[10], False)
+								country = Binary(income_record[14], income_row[14], False)
+
+								#Compute average dissimilarity by weighting each attribute
+								#out of 13 total attributes, 6 were included in the Euclidean distance. Weight accordingly.
+								proximity = ((6/13)*euclidean)+((1/13)*(workclass+marital+occupation+relationship+race+gender+country))
+
+								#Add record ID, proximity, and class for row as tuple to list
+								kNearest.append((str(income_row[0]), proximity, income_row[15]))
+
+								#Sort list by proximity in ascending order (nearest first)
+								kNearest = sorted(kNearest, key=lambda record:record[1])
+							else:
+								#For continuous attributes, calculate Cosine similarity between current record and this row
+								cos = Cosine(record, row)
+
+								#Compute similarities for categorical attributes
+								workclass = Binary(income_record[2], income_row[2], True)
+								#Drop Education categorical attribute (record[4]) since education_cat has already been included in continuous measurement
+								marital = Binary(income_record[6], income_row[6], True)
+								occupation = Binary(income_record[7], income_row[7], True)
+								relationship = Binary(income_record[8], income_row[8], True)
+								race = Binary(income_record[9], income_row[9], True)
+								gender = Binary(income_record[10], income_row[10], True)
+								country = Binary(income_record[14], income_row[14], True)
+
+								#Compute average similarity by weighting each attribute
+								#out of 13 total attributes, 6 were included in the Cosine similarity. Weight accordingly.
+								proximity = ((6/13)*euclidean)+((1/13)*(workclass+education+education_cat+marital+occupation+relationship+race+gender+country))
+
+								#Add record ID, proximity, and class for row as tuple to list
+								kNearest.append((str(income_row[0]), proximity, income_row[15]))
+
+								#Sort list by proximity in descending order (most similar first)
+								kNearest = sorted(kNearest, key=lambda record:record[1], reverse=True)
+
+							#Ensure that list includes no more than k records
+							del kNearest[k:]
+
+							row_number += 1
+
+						#Add record ID and actual class to result row
+						result = [record_id, income_record[15]]
+
+						#Predict class of record from k-Nearest neighbors
+						result += kNNClassifier(kNearest, k)
+							
+						#Write row to output file
+						output.writerow(result)
+
+						#Increment record ID
+						record_id += 1
 
 
