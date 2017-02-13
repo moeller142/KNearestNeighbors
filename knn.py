@@ -3,7 +3,6 @@ import csv
 import pandas
 import numpy
 import math
-from itertools import islice
 
 #Proximity Functions
 #NOTE: Euclidean distance is a measure of dissimilarity
@@ -116,6 +115,7 @@ if len(sys.argv) > 3:
 #Open test data with CSV reader
 with open('Iris_Test.csv', "rt") as iris_test_data:
 	iris_test = csv.reader(iris_test_data)
+	iris_test = list(iris_test)
 
 	with open('Iris_Test.csv', "rt") as panda_iris_test_data:
 		#Open test data with pandas library to provide ability to read entire columns at a time
@@ -124,6 +124,7 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 		#Open training data with CSV reader
 		with open('Iris.csv', "rt") as iris_train_data:
 			iris_train = csv.reader(iris_train_data)
+			iris_train = list(iris_train)
 
 			with open('Iris.csv', "rt") as panda_iris_train_data:
 				#Open training data with pandas library to provide ability to read entire columns at a time
@@ -139,12 +140,13 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 					#Create pandas dataframes for each column in test Iris data
 					test_sepal_length = panda_iris_test.sepal_length
 					test_sepal_width = panda_iris_test.sepal_width
-					test_petal_length = panda_iris_test[' petal_length']
-					test_petal_width = panda_iris_test[' petal_width']
+					test_petal_length = panda_iris_test.petal_length
+					test_petal_width = panda_iris_test.petal_width
 
 					#pre-formatting test Iris data
 					normalized_test = []
-					for row in islice(iris_test, 1, None):
+					#for row in islice(iris_test, 1, None):
+					for row in iris_test[1:]:
 						#min-max normalization of each column
 						normal_sl = (float(row[0]) - test_sepal_length.min().item())/(test_sepal_length.max().item()-test_sepal_length.min().item())
 						normal_sw = (float(row[1]) - test_sepal_width.min().item())/(test_sepal_width.max().item()-test_sepal_width.min().item())
@@ -154,14 +156,15 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 						normalized_test.append([normal_sl, normal_sw, normal_pl, normal_pw, row[4]])
 
 					#Create pandas dataframes for each column in training Iris data
-					train_sepal_length = panda_iris_test.sepal_length
-					train_sepal_width = panda_iris_test.sepal_width
-					train_petal_length = panda_iris_test[' petal_length']
-					train_petal_width = panda_iris_test[' petal_width']
+					train_sepal_length = panda_iris_train.sepal_length
+					train_sepal_width = panda_iris_train.sepal_width
+					train_petal_length = panda_iris_train[' petal_length']
+					train_petal_width = panda_iris_train[' petal_width']
 
 					#pre-formatting training Iris data
 					normalized_train = []
-					for row in islice(iris_train, 1, None):
+					#for row in islice(iris_train, 1, None):
+					for row in iris_train[1:]:
 						#min-max normalization of each column
 						normal_sl = (float(row[0]) - train_sepal_length.min().item())/(train_sepal_length.max().item()-train_sepal_length.min().item())
 						normal_sw = (float(row[1]) - train_sepal_width.min().item())/(train_sepal_width.max().item()-train_sepal_width.min().item())
@@ -217,6 +220,7 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 #Open test data with CSV reader
 with open('income_te.csv', "rt") as income_test_data:
 	income_test = csv.reader(income_test_data)
+	income_test = list(income_test)
 
 	with open('income_te.csv', "rt") as panda_income_test_data:
 		#Open test data with pandas library to provide ability to read entire columns at a time
@@ -225,6 +229,7 @@ with open('income_te.csv', "rt") as income_test_data:
 		#Open training data with CSV reader
 		with open('income_tr.csv', "rt") as income_train_data:
 			income_train = csv.reader(income_train_data)
+			income_train = list(income_train)
 
 			with open('income_tr.csv', "rt") as panda_income_train_data:
 				#Open training data with pandas library to provide ability to read entire columns at a time
@@ -236,5 +241,19 @@ with open('income_te.csv', "rt") as income_test_data:
 
 					#Create header row for output CSV file
 					output.writerow(['ID', 'Actual Class', 'Predicted Class', 'Posterior Probability'])
+
+					#Create pandas dataframes for each continuous attribute's column in test Income data
+					age = panda_income_test.age
+					fnlwgt = panda_income_test.fnlwgt
+					education = panda_income_test.education_cat
+					gain = panda_income_test.capital_gain
+					loss = panda_income_test.capital_loss
+					hpw = panda_income_test.hour_per_week
+
+					#TODO include class in normamlized thingy (prolly don't need to be cause of list??)
+
+					#for row in income_test:
+						#TODO
+					#TODO drop education categorical
 
 
