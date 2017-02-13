@@ -109,3 +109,37 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 
 					#Create header row for output CSV file
 					output.writerow(['ID', 'Actual Class', 'Predicted Class', 'Posterior Probability'])
+
+					#Create pandas dataframes for each column in test Iris data
+					test_sepal_length = panda_iris_test.sepal_length
+					test_sepal_width = panda_iris_test.sepal_width
+					test_petal_length = panda_iris_test[' petal_length']
+					test_petal_width = panda_iris_test[' petal_width']
+
+					#pre-formatting test Iris data
+					normalized_test = []
+					for row in islice(iris, 1, None):
+						#min-max normalization of each column
+						normal_sl = (float(row[0]) - test_sepal_length.min().item())/(test_sepal_length.max().item()-test_sepal_length.min().item())
+						normal_sw = (float(row[1]) - test_sepal_width.min().item())/(test_sepal_width.max().item()-test_sepal_width.min().item())
+						normal_pl = (float(row[2]) - test_petal_length.min().item())/(test_petal_length.max().item()-test_petal_length.min().item())
+						normal_pw = (float(row[3]) - test_petal_width.min().item())/(test_petal_width.max().item()-test_petal_width.min().item())
+						#Save normalized rows
+						normalized_test.append([normal_sl, normal_sw, normal_pl, normal_pw])
+
+					#Create pandas dataframes for each column in training Iris data
+					train_sepal_length = panda_iris_test.sepal_length
+					train_sepal_width = panda_iris_test.sepal_width
+					train_petal_length = panda_iris_test[' petal_length']
+					train_petal_width = panda_iris_test[' petal_width']
+
+					#pre-formatting training Iris data
+					normalized_train = []
+					for row in islice(iris, 1, None):
+						#min-max normalization of each column
+						normal_sl = (float(row[0]) - train_sepal_length.min().item())/(train_sepal_length.max().item()-train_sepal_length.min().item())
+						normal_sw = (float(row[1]) - train_sepal_width.min().item())/(train_sepal_width.max().item()-train_sepal_width.min().item())
+						normal_pl = (float(row[2]) - train_petal_length.min().item())/(train_petal_length.max().item()-train_petal_length.min().item())
+						normal_pw = (float(row[3]) - train_petal_width.min().item())/(train_petal_width.max().item()-train_petal_width.min().item())
+						#Save normalized rows
+						normalized.append([normal_sl, normal_sw, normal_pl, normal_pw])
