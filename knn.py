@@ -145,7 +145,7 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 
 					#pre-formatting test Iris data
 					normalized_test = []
-					#for row in islice(iris_test, 1, None):
+					
 					for row in iris_test[1:]:
 						#min-max normalization of each column
 						normal_sl = (float(row[0]) - test_sepal_length.min().item())/(test_sepal_length.max().item()-test_sepal_length.min().item())
@@ -163,7 +163,7 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 
 					#pre-formatting training Iris data
 					normalized_train = []
-					#for row in islice(iris_train, 1, None):
+					
 					for row in iris_train[1:]:
 						#min-max normalization of each column
 						normal_sl = (float(row[0]) - train_sepal_length.min().item())/(train_sepal_length.max().item()-train_sepal_length.min().item())
@@ -250,10 +250,20 @@ with open('income_te.csv', "rt") as income_test_data:
 					loss = panda_income_test.capital_loss
 					hpw = panda_income_test.hour_per_week
 
-					#TODO include class in normamlized thingy (prolly don't need to be cause of list??)
+					#pre-formatting test Income data
+					normalized_test = []
 
-					#for row in income_test:
-						#TODO
+					for row in income_test[1:]:
+						#min-max normalization of each column
+						normal_age = (float(row[1]) - age.min().item())/(age.max().item()-age.min().item())
+						normal_fnlwgt = (float(row[3]) - fnlwgt.min().item())/(fnlwgt.max().item()-fnlwgt.min().item())
+						normal_education = (float(row[5]) - education.min().item())/(education.max().item()-education.min().item())
+						normal_gain = (float(row[11]) - gain.min().item())/(gain.max().item()-gain.min().item())
+						normal_loss = (float(row[12]) - loss.min().item())/(loss.max().item()-loss.min().item())
+						normal_hpw = (float(row[13]) - hpw.min().item())/(hpw.max().item()-hpw.min().item())
+						#Save normalized row
+						normalized_test.append([normal_age, normal_fnlwgt, normal_education, normal_gain, normal_loss, normal_hpw])
+
 					#TODO drop education categorical
 
 
