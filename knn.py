@@ -117,12 +117,12 @@ if len(sys.argv) > 3:
 with open('Iris_Test.csv', "rt") as iris_test_data:
 	iris_test = csv.reader(iris_test_data)
 
-	with open('Iris.csv', "rt") as panda_iris_test_data:
+	with open('Iris_Test.csv', "rt") as panda_iris_test_data:
 		#Open test data with pandas library to provide ability to read entire columns at a time
 		panda_iris_test = pandas.read_csv(panda_iris_test_data)
 
 		#Open training data with CSV reader
-		with open('Iris_Test.csv', "rt") as iris_train_data:
+		with open('Iris.csv', "rt") as iris_train_data:
 			iris_train = csv.reader(iris_train_data)
 
 			with open('Iris.csv', "rt") as panda_iris_train_data:
@@ -212,3 +212,29 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 
 						#Increment record ID
 						record_id += 1
+
+#Income Data
+#Open test data with CSV reader
+with open('income_te.csv', "rt") as income_test_data:
+	income_test = csv.reader(income_test_data)
+
+	with open('income_te.csv', "rt") as panda_income_test_data:
+		#Open test data with pandas library to provide ability to read entire columns at a time
+		panda_income_test = pandas.read_csv(panda_income_test_data)
+
+		#Open training data with CSV reader
+		with open('income_tr.csv', "rt") as income_train_data:
+			income_train = csv.reader(income_train_data)
+
+			with open('income_tr.csv', "rt") as panda_income_train_data:
+				#Open training data with pandas library to provide ability to read entire columns at a time
+				panda_income_train = pandas.read_csv(panda_income_train_data)
+
+				#Create (or overwrite) CSV file to hold output
+				with open('income_out.csv',"w") as output_file:
+					output = csv.writer(output_file, dialect='excel')
+
+					#Create header row for output CSV file
+					output.writerow(['ID', 'Actual Class', 'Predicted Class', 'Posterior Probability'])
+
+
