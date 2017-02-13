@@ -51,6 +51,32 @@ def Binary(element1, element2, similarity):
 		else:
 			return 1
 
+def kNNClassifier(kNearest, k):
+	'''
+	Determines the most popular class out of k records and calculates the posterior probability of that class.
+	Requires len(kNearest) > 0
+	'''
+	class_voting = {}
+
+	#For each of k nearest neighbors,
+	for neighbor in kNearest:
+		#If this neighbor's class has already been voted for by another neighbor,
+		if neighbor[2] in class_voting:
+			#Increment the number of votes
+			class_voting[neighbor[2]] = class_voting[neighbor[2]]+1
+		else:
+			#Add class to dictionary with one vote
+			class_voting[neighbor[2]] = 1
+	
+	#Determine "most popular" class
+	predicted_class = max(class_voting, key=class_voting.get)
+
+	#Calculate posterior probability
+	posterior = class_voting[predicted_class]/k
+
+	return [predicted_class, posterior]
+
+
 #Initialization
 #initialize k to a default value of 5
 k = 5
@@ -97,7 +123,7 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 
 		#Open training data with CSV reader
 		with open('Iris_Test.csv', "rt") as iris_train_data:
-			iris_train = csv.reader(iris_test_data)
+			iris_train = csv.reader(iris_train_data)
 
 			with open('Iris.csv', "rt") as panda_iris_train_data:
 				#Open training data with pandas library to provide ability to read entire columns at a time
@@ -118,14 +144,14 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 
 					#pre-formatting test Iris data
 					normalized_test = []
-					for row in islice(iris, 1, None):
+					for row in islice(iris_test, 1, None):
 						#min-max normalization of each column
 						normal_sl = (float(row[0]) - test_sepal_length.min().item())/(test_sepal_length.max().item()-test_sepal_length.min().item())
 						normal_sw = (float(row[1]) - test_sepal_width.min().item())/(test_sepal_width.max().item()-test_sepal_width.min().item())
 						normal_pl = (float(row[2]) - test_petal_length.min().item())/(test_petal_length.max().item()-test_petal_length.min().item())
 						normal_pw = (float(row[3]) - test_petal_width.min().item())/(test_petal_width.max().item()-test_petal_width.min().item())
-						#Save normalized rows
-						normalized_test.append([normal_sl, normal_sw, normal_pl, normal_pw])
+						#Save normalized rows with class
+						normalized_test.append([normal_sl, normal_sw, normal_pl, normal_pw, row[4]])
 
 					#Create pandas dataframes for each column in training Iris data
 					train_sepal_length = panda_iris_test.sepal_length
@@ -135,11 +161,54 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 
 					#pre-formatting training Iris data
 					normalized_train = []
-					for row in islice(iris, 1, None):
+					for row in islice(iris_train, 1, None):
 						#min-max normalization of each column
 						normal_sl = (float(row[0]) - train_sepal_length.min().item())/(train_sepal_length.max().item()-train_sepal_length.min().item())
 						normal_sw = (float(row[1]) - train_sepal_width.min().item())/(train_sepal_width.max().item()-train_sepal_width.min().item())
 						normal_pl = (float(row[2]) - train_petal_length.min().item())/(train_petal_length.max().item()-train_petal_length.min().item())
 						normal_pw = (float(row[3]) - train_petal_width.min().item())/(train_petal_width.max().item()-train_petal_width.min().item())
-						#Save normalized rows
-						normalized.append([normal_sl, normal_sw, normal_pl, normal_pw])
+						#Save normalized rows with class
+						normalized_train.append([normal_sl, normal_sw, normal_pl, normal_pw, row[4]])
+
+
+					#Initialize record ID (Iris data does not assign IDs)
+					record_id = 1
+					#Iterate over test records
+					for record in normalized_test:
+						kNearest = []
+
+						#Initialize row ID
+						row_id = 1
+						#Compare test record to each row in training data set
+						for row in normalized_train:
+							if iris_measure == "E":
+								#Calculate Euclidean distance between current test record and this row of training data
+								proximity = Euclidean(record[0:4], row[0:4])
+								#Add record ID, proximity, and class for training row as tuple to list
+								kNearest.append((str(row_id), proximity, row[4]))
+								#Sort list by proximity in ascending order (nearest first)
+								kNearest = sorted(kNearest, key=lambda record:record[1])
+							else:
+								#Calculate Cosine similarity of record test record and this row of training data
+								proximity = Cosine(record[0:4], row[0:4])
+								#Add record ID, proximity, and class for training row as tuple to list
+								kNearest.append((str(row_id), proximity, row[4]))
+								#Sort list by proximity in descending order (most similar first)
+								kNearest = sorted(kNearest, key=lambda record:record[1], reverse=True)
+							#Ensure that list includes no more than k records
+							del kNearest[k:]
+
+							#Increment row ID
+							row_id += 1
+
+						#Add record ID and actual class to result row
+						result = [record_id, record[4]]
+
+						#Predict class of record from k-Nearest neighbors
+						result += kNNClassifier(kNearest, k)
+							
+						#Write row to output file
+						output.writerow(result)
+
+						#Increment record ID
+						record_id += 1
