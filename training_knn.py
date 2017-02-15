@@ -149,270 +149,195 @@ if len(sys.argv) > 3:
 			print("Warning: user has entered invalid argument for secondary proximity measure. By default, the primary measure (Cosine similarity) will be used.")
 
 #Iris Data
-#Open test data with CSV reader - NOTE: this version tests the accuracy of the model by testing on training data
-with open('Iris.csv', "rt") as iris_test_data:
-	iris_test = csv.reader(iris_test_data)
-	iris_test = list(iris_test)
+#Open input data with CSV reader - NOTE: this version tests the accuracy of the model by testing on training data
+with open('Iris.csv', "rt") as iris_data:
+	iris = csv.reader(iris_data)
+	iris = list(iris)
 
-	with open('Iris.csv', "rt") as panda_iris_test_data:
-		#Open test data with pandas library to provide ability to read entire columns at a time
-		panda_iris_test = pandas.read_csv(panda_iris_test_data)
+	with open('Iris.csv', "rt") as panda_iris_data:
+		#Open input data with pandas library to provide ability to read entire columns at a time
+		panda_iris = pandas.read_csv(panda_iris_data)
 
-		#Open training data with CSV reader
-		with open('Iris.csv', "rt") as iris_train_data:
-			iris_train = csv.reader(iris_train_data)
-			iris_train = list(iris_train)
+		#Create (or overwrite) CSV file to hold output
+		with open('iris_out.csv',"w") as output_file:
+			output = csv.writer(output_file, dialect='excel')
 
-			with open('Iris.csv', "rt") as panda_iris_train_data:
-				#Open training data with pandas library to provide ability to read entire columns at a time
-				panda_iris_train = pandas.read_csv(panda_iris_train_data)
+			#Create header row for output CSV file
+			output.writerow(['ID', 'Actual Class', 'Predicted Class', 'Posterior Probability'])
 
-				#Create (or overwrite) CSV file to hold output
-				with open('iris_out.csv',"w") as output_file:
-					output = csv.writer(output_file, dialect='excel')
+			#Create pandas dataframes for each column in Iris data
+			sepal_length = panda_iris.sepal_length
+			sepal_width = panda_iris.sepal_width
+			petal_length = panda_iris[' petal_length']
+			petal_width = panda_iris[' petal_length']
 
-					#Create header row for output CSV file
-					output.writerow(['ID', 'Actual Class', 'Predicted Class', 'Posterior Probability'])
-
-					#Create pandas dataframes for each column in test Iris data
-					test_sepal_length = panda_iris_test.sepal_length
-					test_sepal_width = panda_iris_test.sepal_width
-					test_petal_length = panda_iris_test[' petal_length']
-					test_petal_width = panda_iris_test[' petal_length']
-
-					#Create pandas dataframes for each column in training Iris data
-					train_sepal_length = panda_iris_train.sepal_length
-					train_sepal_width = panda_iris_train.sepal_width
-					train_petal_length = panda_iris_train[' petal_length']
-					train_petal_width = panda_iris_train[' petal_width']
-
-					#Concatenate pandas dataframes for each column to create combined Iris data
-					sepal_length = pandas.concat([test_sepal_length, train_sepal_length])
-					sepal_width = pandas.concat([test_sepal_width, train_sepal_width])
-					petal_length = pandas.concat([test_petal_length, train_petal_length])
-					petal_width = pandas.concat([test_petal_width, train_petal_width])
-
-					#pre-formatting test Iris data
-					normalized_test = []
+			#pre-formatting Iris data
+			normalized = []
 					
-					for row in iris_test[1:]:
-						#min-max normalization of each column in combined Iris data set
-						normal_sl = (float(row[0]) - sepal_length.min().item())/(sepal_length.max().item()-sepal_length.min().item())
-						normal_sw = (float(row[1]) - sepal_width.min().item())/(sepal_width.max().item()-sepal_width.min().item())
-						normal_pl = (float(row[2]) - petal_length.min().item())/(petal_length.max().item()-petal_length.min().item())
-						normal_pw = (float(row[3]) - petal_width.min().item())/(petal_width.max().item()-petal_width.min().item())
-						#Save normalized rows with class
-						normalized_test.append([normal_sl, normal_sw, normal_pl, normal_pw, row[4]])
+			for row in iris[1:]:
+				#min-max normalization of each column in Iris data set
+				normal_sl = (float(row[0]) - sepal_length.min().item())/(sepal_length.max().item()-sepal_length.min().item())
+				normal_sw = (float(row[1]) - sepal_width.min().item())/(sepal_width.max().item()-sepal_width.min().item())
+				normal_pl = (float(row[2]) - petal_length.min().item())/(petal_length.max().item()-petal_length.min().item())
+				normal_pw = (float(row[3]) - petal_width.min().item())/(petal_width.max().item()-petal_width.min().item())
+				#Save normalized rows with class
+				normalized.append([normal_sl, normal_sw, normal_pl, normal_pw, row[4]])
 
-					
+			#Initialize record ID (Iris data does not assign IDs)
+			record_id = 1
+			#For each test record
+			for record in normalized:
+				kNearest = []
 
-					#pre-formatting training Iris data
-					normalized_train = []
-					for row in iris_train[1:]:
-						#min-max normalization of each column in combined Iris data set
-						normal_sl = (float(row[0]) - sepal_length.min().item())/(sepal_length.max().item()-sepal_length.min().item())
-						normal_sw = (float(row[1]) - sepal_width.min().item())/(sepal_width.max().item()-sepal_width.min().item())
-						normal_pl = (float(row[2]) - petal_length.min().item())/(petal_length.max().item()-petal_length.min().item())
-						normal_pw = (float(row[3]) - petal_width.min().item())/(petal_width.max().item()-petal_width.min().item())
-						#Save normalized rows with class
-						normalized_train.append([normal_sl, normal_sw, normal_pl, normal_pw, row[4]])
+				#Initialize row ID
+				row_id = 1
+				#Compare test record to each row in training data set
+				for row in normalized:
+					if iris_measure == "E":
+						#Calculate Euclidean distance between current test record and this row of training data
+						proximity = Euclidean(record[0:4], row[0:4])
+						#Add record ID, proximity, and class for training row as tuple to list
+						kNearest.append((str(row_id), proximity, row[4]))
+						#Sort list by proximity in ascending order (nearest first)
+						kNearest = sorted(kNearest, key=lambda record:record[1])
+					else:
+						#Calculate Cosine similarity of record test record and this row of training data
+						proximity = Cosine(record[0:4], row[0:4])
+						#Add record ID, proximity, and class for training row as tuple to list
+						kNearest.append((str(row_id), proximity, row[4]))
+						#Sort list by proximity in descending order (most similar first)
+						kNearest = sorted(kNearest, key=lambda record:record[1], reverse=True)
+					#Ensure that list includes no more than k records
+					del kNearest[k:]
 
-					#Initialize record ID (Iris data does not assign IDs)
-					record_id = 1
-					#For each test record
-					for record in normalized_test:
-						kNearest = []
+					#Increment row ID
+					row_id += 1
 
-						#Initialize row ID
-						row_id = 1
-						#Compare test record to each row in training data set
-						for row in normalized_train:
-							if iris_measure == "E":
-								#Calculate Euclidean distance between current test record and this row of training data
-								proximity = Euclidean(record[0:4], row[0:4])
-								#Add record ID, proximity, and class for training row as tuple to list
-								kNearest.append((str(row_id), proximity, row[4]))
-								#Sort list by proximity in ascending order (nearest first)
-								kNearest = sorted(kNearest, key=lambda record:record[1])
-							else:
-								#Calculate Cosine similarity of record test record and this row of training data
-								proximity = Cosine(record[0:4], row[0:4])
-								#Add record ID, proximity, and class for training row as tuple to list
-								kNearest.append((str(row_id), proximity, row[4]))
-								#Sort list by proximity in descending order (most similar first)
-								kNearest = sorted(kNearest, key=lambda record:record[1], reverse=True)
-							#Ensure that list includes no more than k records
-							del kNearest[k:]
+				#Add record ID and actual class to result row
+				result = [record_id, record[4]]
 
-							#Increment row ID
-							row_id += 1
-
-						#Add record ID and actual class to result row
-						result = [record_id, record[4]]
-
-						#Predict class of record from k-Nearest neighbors
-						result += kNNClassifier(kNearest, k)
+				#Predict class of record from k-Nearest neighbors
+				result += kNNClassifier(kNearest, k)
 							
-						#Write row to output file
-						output.writerow(result)
-
-						#Increment record ID
-						record_id += 1
+				#Write row to output file
+				output.writerow(result)
+				#Increment record ID
+				record_id += 1
 
 #Income Data
-#Open test data with CSV reader - NOTE: This version of the program tests the accuracy of the model by testing on training data
-with open('income_tr.csv', "rt") as income_test_data:
-	income_test = csv.reader(income_test_data)
-	income_test = list(income_test)
+#Open input data with CSV reader - NOTE: This version of the program tests the accuracy of the model by testing on training data
+with open('income_tr.csv', "rt") as income_data:
+	income = csv.reader(income_data)
+	income = list(income)
 
-	with open('income_tr.csv', "rt") as panda_income_test_data:
-		#Open test data with pandas library to provide ability to read entire columns at a time
-		panda_income_test = pandas.read_csv(panda_income_test_data)
+	with open('income_tr.csv', "rt") as panda_income_data:
+		#Open input data with pandas library to provide ability to read entire columns at a time
+		panda_income = pandas.read_csv(panda_income_data)
 
-		#Open training data with CSV reader
-		with open('income_tr.csv', "rt") as income_train_data:
-			income_train = csv.reader(income_train_data)
-			income_train = list(income_train)
+		#Create (or overwrite) CSV file to hold output
+		with open('income_out.csv',"w") as output_file:
+			output = csv.writer(output_file, dialect='excel')
 
-			with open('income_tr.csv', "rt") as panda_income_train_data:
-				#Open training data with pandas library to provide ability to read entire columns at a time
-				panda_income_train = pandas.read_csv(panda_income_train_data)
+			#Create header row for output CSV file
+			output.writerow(['ID', 'Actual Class', 'Predicted Class', 'Posterior Probability'])
 
-				#Create (or overwrite) CSV file to hold output
-				with open('income_out.csv',"w") as output_file:
-					output = csv.writer(output_file, dialect='excel')
+			#Create pandas dataframes for each continuous attribute's column in Income data
+			age = panda_income.age
+			fnlwgt = panda_income.fnlwgt
+			education = panda_income.education_cat
+			gain = panda_income.capital_gain
+			loss = panda_income.capital_loss
+			hpw = panda_income.hour_per_week
 
-					#Create header row for output CSV file
-					output.writerow(['ID', 'Actual Class', 'Predicted Class', 'Posterior Probability'])
+			#pre-formatting Income data
+			normalized = []
 
-					#Create pandas dataframes for each continuous attribute's column in test Income data
-					test_age = panda_income_test.age
-					test_fnlwgt = panda_income_test.fnlwgt
-					test_education = panda_income_test.education_cat
-					test_gain = panda_income_test.capital_gain
-					test_loss = panda_income_test.capital_loss
-					test_hpw = panda_income_test.hour_per_week
+			for row in income[1:]:
+				#min-max normalization of each column
+				normal_age = (float(row[1]) - age.min().item())/(age.max().item()-age.min().item())
+				normal_fnlwgt = (float(row[3]) - fnlwgt.min().item())/(fnlwgt.max().item()-fnlwgt.min().item())
+				normal_education = (float(row[5]) - education.min().item())/(education.max().item()-education.min().item())
+				normal_gain = (float(row[11]) - gain.min().item())/(gain.max().item()-gain.min().item())
+				normal_loss = (float(row[12]) - loss.min().item())/(loss.max().item()-loss.min().item())
+				normal_hpw = (float(row[13]) - hpw.min().item())/(hpw.max().item()-hpw.min().item())
+				#Save normalized row
+				normalized.append([normal_age, normal_fnlwgt, normal_education, normal_gain, normal_loss, normal_hpw])
 
-					#Create pandas dataframes for each continuous attribute's column in training Income data
-					train_age = panda_income_train.age
-					train_fnlwgt = panda_income_train.fnlwgt
-					train_education = panda_income_train.education_cat
-					train_gain = panda_income_train.capital_gain
-					train_loss = panda_income_train.capital_loss
-					train_hpw = panda_income_train.hour_per_week
+			record_number = 1
+			#For each test record
+			for record in normalized:
+				#Retrieve corresponding row from full data set
+				income_record = income[record_number]
 
-					#Concatenate pandas dataframes for each column to create combined Income data
-					age = pandas.concat([test_age, train_age])
-					fnlwgt = pandas.concat([test_fnlwgt, train_fnlwgt])
-					education = pandas.concat([test_education, train_education])
-					gain = pandas.concat([test_gain, train_gain])
-					loss = pandas.concat([test_loss, train_loss])
-					hpw = pandas.concat([test_hpw, train_hpw])
+				kNearest = []
 
-					#pre-formatting test Income data
-					normalized_test = []
+				#Initialize row ID
+				row_number = 1
+				#Compare test record to each row in training data set
+				for row in normalized:
+					#Retrieve corresponding row from full data set
+					income_row = income[row_number]
 
-					for row in income_test[1:]:
-						#min-max normalization of each column
-						normal_age = (float(row[1]) - age.min().item())/(age.max().item()-age.min().item())
-						normal_fnlwgt = (float(row[3]) - fnlwgt.min().item())/(fnlwgt.max().item()-fnlwgt.min().item())
-						normal_education = (float(row[5]) - education.min().item())/(education.max().item()-education.min().item())
-						normal_gain = (float(row[11]) - gain.min().item())/(gain.max().item()-gain.min().item())
-						normal_loss = (float(row[12]) - loss.min().item())/(loss.max().item()-loss.min().item())
-						normal_hpw = (float(row[13]) - hpw.min().item())/(hpw.max().item()-hpw.min().item())
-						#Save normalized row
-						normalized_test.append([normal_age, normal_fnlwgt, normal_education, normal_gain, normal_loss, normal_hpw])
+					if iris_measure == "E":
+						#For continuous attributes, calculate Euclidean distance between current record and this row
+						euclidean = Euclidean(record, row)
 
-					#pre-formatting training Income data
-					normalized_train = []
+						#Compute dissimilarities for categorical attributes
+						workclass = WorkclassComparison(income_record[2], income_row[2], False)
+						#Drop Education categorical attribute (index 4) since education_cat has already been included in continuous measurement
+						marital = MaritalComparison(income_record[6], income_row[6], False)
+						occupation = Binary(income_record[7], income_row[7], False)
+						relationship = Binary(income_record[8], income_row[8], False)
+						race = Binary(income_record[9], income_row[9], False)
+						gender = Binary(income_record[10], income_row[10], False)
+						country = Binary(income_record[14], income_row[14], False)
 
-					for row in income_train[1:]:
-						#min-max normalization of each column
-						normal_age = (float(row[1]) - age.min().item())/(age.max().item()-age.min().item())
-						normal_fnlwgt = (float(row[3]) - fnlwgt.min().item())/(fnlwgt.max().item()-fnlwgt.min().item())
-						normal_education = (float(row[5]) - education.min().item())/(education.max().item()-education.min().item())
-						normal_gain = (float(row[11]) - gain.min().item())/(gain.max().item()-gain.min().item())
-						normal_loss = (float(row[12]) - loss.min().item())/(loss.max().item()-loss.min().item())
-						normal_hpw = (float(row[13]) - hpw.min().item())/(hpw.max().item()-hpw.min().item())
-						#Save normalized row
-						normalized_train.append([normal_age, normal_fnlwgt, normal_education, normal_gain, normal_loss, normal_hpw])
+						#Compute average dissimilarity by weighting each attribute
+						#out of 13 total attributes, 6 were included in the Euclidean distance. Weight accordingly.
+						proximity = ((6/13)*euclidean)+((1/13)*(workclass+marital+occupation+relationship+race+gender+country))
 
+						#Add record ID, proximity, and class for row as tuple to list
+						kNearest.append((str(income_row[0]), proximity, income_row[15]))
 
-					record_number = 1
-					#For each test record
-					for record in normalized_test:
-						#Retrieve corresponding row from full data set
-						income_record = income_test[record_number]
+						#Sort list by proximity in ascending order (nearest first)
+						kNearest = sorted(kNearest, key=lambda record:record[1])
+					else:
+						#For continuous attributes, calculate Cosine similarity between current record and this row
+						cos = Cosine(record, row)
 
-						kNearest = []
+						#Compute similarities for categorical attributes
+						workclass = WorkclassComparison(income_record[2], income_row[2], True)
+						#Drop Education categorical attribute (record[4]) since education_cat has already been included in continuous measurement
+						marital = MaritalComparison(income_record[6], income_row[6], True)
+						occupation = Binary(income_record[7], income_row[7], True)
+						relationship = Binary(income_record[8], income_row[8], True)
+						race = Binary(income_record[9], income_row[9], True)
+						gender = Binary(income_record[10], income_row[10], True)
+						country = Binary(income_record[14], income_row[14], True)
 
-						#Initialize row ID
-						row_number = 1
-						#Compare test record to each row in training data set
-						for row in normalized_train:
-							#Retrieve corresponding row from full data set
-							income_row = income_train[row_number]
+						#Compute average similarity by weighting each attribute
+						#out of 13 total attributes, 6 were included in the Cosine similarity. Weight accordingly.
+						proximity = ((6/13)*cos)+((1/13)*(workclass+marital+occupation+relationship+race+gender+country))
 
-							if iris_measure == "E":
-								#For continuous attributes, calculate Euclidean distance between current record and this row
-								euclidean = Euclidean(record, row)
+						#Add record ID, proximity, and class for row as tuple to list
+						kNearest.append((str(income_row[0]), proximity, income_row[15]))
 
-								#Compute dissimilarities for categorical attributes
-								workclass = WorkclassComparison(income_record[2], income_row[2], False)
-								#Drop Education categorical attribute (index 4) since education_cat has already been included in continuous measurement
-								marital = MaritalComparison(income_record[6], income_row[6], False)
-								occupation = Binary(income_record[7], income_row[7], False)
-								relationship = Binary(income_record[8], income_row[8], False)
-								race = Binary(income_record[9], income_row[9], False)
-								gender = Binary(income_record[10], income_row[10], False)
-								country = Binary(income_record[14], income_row[14], False)
+						#Sort list by proximity in descending order (most similar first)
+						kNearest = sorted(kNearest, key=lambda record:record[1], reverse=True)
 
-								#Compute average dissimilarity by weighting each attribute
-								#out of 13 total attributes, 6 were included in the Euclidean distance. Weight accordingly.
-								proximity = ((6/13)*euclidean)+((1/13)*(workclass+marital+occupation+relationship+race+gender+country))
+					#Ensure that list includes no more than k records
+					del kNearest[k:]
 
-								#Add record ID, proximity, and class for row as tuple to list
-								kNearest.append((str(income_row[0]), proximity, income_row[15]))
+					row_number += 1
 
-								#Sort list by proximity in ascending order (nearest first)
-								kNearest = sorted(kNearest, key=lambda record:record[1])
-							else:
-								#For continuous attributes, calculate Cosine similarity between current record and this row
-								cos = Cosine(record, row)
+				#Add record ID and actual class to result row
+				result = [income_record[0], income_record[15]]
 
-								#Compute similarities for categorical attributes
-								workclass = WorkclassComparison(income_record[2], income_row[2], True)
-								#Drop Education categorical attribute (record[4]) since education_cat has already been included in continuous measurement
-								marital = MaritalComparison(income_record[6], income_row[6], True)
-								occupation = Binary(income_record[7], income_row[7], True)
-								relationship = Binary(income_record[8], income_row[8], True)
-								race = Binary(income_record[9], income_row[9], True)
-								gender = Binary(income_record[10], income_row[10], True)
-								country = Binary(income_record[14], income_row[14], True)
-
-								#Compute average similarity by weighting each attribute
-								#out of 13 total attributes, 6 were included in the Cosine similarity. Weight accordingly.
-								proximity = ((6/13)*cos)+((1/13)*(workclass+marital+occupation+relationship+race+gender+country))
-
-								#Add record ID, proximity, and class for row as tuple to list
-								kNearest.append((str(income_row[0]), proximity, income_row[15]))
-
-								#Sort list by proximity in descending order (most similar first)
-								kNearest = sorted(kNearest, key=lambda record:record[1], reverse=True)
-
-							#Ensure that list includes no more than k records
-							del kNearest[k:]
-
-							row_number += 1
-
-						#Add record ID and actual class to result row
-						result = [income_record[0], income_record[15]]
-
-						#Predict class of record from k-Nearest neighbors
-						result += kNNClassifier(kNearest, k)
+				#Predict class of record from k-Nearest neighbors
+				result += kNNClassifier(kNearest, k)
 							
-						#Write row to output file
-						output.writerow(result)
+				#Write row to output file
+				output.writerow(result)
 
-						#Increment record ID
-						record_number += 1
+				#Increment record ID
+				record_number += 1
