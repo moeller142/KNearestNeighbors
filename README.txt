@@ -7,6 +7,7 @@ Dependencies:
 		To install, use the command "sudo apt-get install python-pip"
 	This program requires the "pandas" library for Python.
 		To install, use the command "sudo apt-get install python3-pandas"
+
 Input Data:
 	Input data files should be placed in the same directory as the program file.
 
@@ -32,11 +33,18 @@ Execution:
 				- python3 proximity.py 3
 				- python3 proximity.py 10 C
 				- python3 proximity.py 6 E C
+
 Behavior:
-	The program takes as input two data sets: the Iris data set (Iris.csv) and the Income data set (income_tr.csv).
-	For each data set, individually, the proximity of each record to all other records in the data set is calculated.
-	For each record, the "k" nearest records are stored (where k is a positive integer).
-	Upon completion, the program outputs a new data set containing each record's ID, and the IDs and proximities of the "k" records which are closest to it. These records are displayed in order from nearest to farthest. 
+	The program takes as input four data sets:
+		- the Iris training data set (Iris.csv)
+		- the Iris test data set (Iris_Test.csv)
+		- the Income training data set (income_tr.csv)
+		- the Income test data set (income_te.csv)
+	For each test data set, the proximity of each record to all records in the respective training data set is calculated.
+	For each test record, the "k" nearest training records are examined to determine which class occurs most frequently.
+		The most frequent class among the k-nearest neighbors is predicted to be the test record's class.
+	Upon completion, the program outputs a new data set containing each record's ID, its actual class, the class predicted by its neighbors, and the posterior probability of the predicted class.
+		The posterior probability is calculated as the number of neighbors whose class is the predicted class divided by k total neighbors.
 
 	The program accepts a number of parameters.
 		- The value for k can be changed by the user. By default, it is 5.
@@ -45,6 +53,7 @@ Behavior:
 			- By default, the program will calculate Euclidean distance in determining proximity.
 		- The proximity measure for the second data set (the Income data set) can be chosen independently of the first data set.
 			- By default, the second data set will use the same proximity measure as the first data set.
+
 Output Data:
 	Output data files will be stored in CSV format in the same directory as the program file.
 	The output files will be named "iris_out.csv" and "income_out.csv" for the Iris and Income data sets, respectively.

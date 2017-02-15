@@ -50,6 +50,43 @@ def Binary(element1, element2, similarity):
 		else:
 			return 1
 
+def WorkclassComparison(element1, element2, similarity):
+	if "gov" in element1:
+		if "gov" in element2:
+			if similarity:
+				return 1
+			else:
+				return 0
+		
+	elif "Self-emp" in element1:
+		if "Self-emp" in element2:
+			if similarity:
+				return 1
+			else:
+				return 0
+
+	return Binary(element1, element2, similarity)
+
+def MaritalComparison(element1, element2, similarity):
+	if "Married" in element1:
+		if "Married" in element2:
+			if similarity:
+				return 1
+			else:
+				return 0
+		else:
+			return Binary(element1, element2, similarity)
+	
+	else:
+		if "Married" not in element2:
+			if similarity:
+				return 1
+			else:
+				return 0
+		else:
+			return Binary(element1, element2, similarity)
+
+
 def kNNClassifier(kNearest, k):
 	'''
 	Determines the most popular class out of k records and calculates the posterior probability of that class.
@@ -299,9 +336,9 @@ with open('income_te.csv', "rt") as income_test_data:
 								euclidean = Euclidean(record, row)
 
 								#Compute dissimilarities for categorical attributes
-								workclass = Binary(income_record[2], income_row[2], False)
+								workclass = WorkclassComparison(income_record[2], income_row[2], False)
 								#Drop Education categorical attribute (index 4) since education_cat has already been included in continuous measurement
-								marital = Binary(income_record[6], income_row[6], False)
+								marital = MaritalComparison(income_record[6], income_row[6], False)
 								occupation = Binary(income_record[7], income_row[7], False)
 								relationship = Binary(income_record[8], income_row[8], False)
 								race = Binary(income_record[9], income_row[9], False)
@@ -347,7 +384,7 @@ with open('income_te.csv', "rt") as income_test_data:
 							row_number += 1
 
 						#Add record ID and actual class to result row
-						result = [record_id, income_record[15]]
+						result = [income_record[0], income_record[15]]
 
 						#Predict class of record from k-Nearest neighbors
 						result += kNNClassifier(kNearest, k)
@@ -356,6 +393,4 @@ with open('income_te.csv', "rt") as income_test_data:
 						output.writerow(result)
 
 						#Increment record ID
-						record_id += 1
-
-
+						record_number += 1
