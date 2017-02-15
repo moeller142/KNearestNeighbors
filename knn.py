@@ -87,7 +87,7 @@ def MaritalComparison(element1, element2, similarity):
 			return Binary(element1, element2, similarity)
 
 
-def kNNClassifier(kNearest, k):
+def kNNClassifier(kNearest, k, weighted, measure):
 	'''
 	Determines the most popular class out of k records and calculates the posterior probability of that class.
 	Requires len(kNearest) > 0
@@ -96,13 +96,22 @@ def kNNClassifier(kNearest, k):
 
 	#For each of k nearest neighbors,
 	for neighbor in kNearest:
+		#Determine the size of the vote this neighbor gets
+		vote = 1 #1 by default
+		if weighted:
+			if measure == "E":
+				#Size of vote is equal to the distance of the nearest neighbor divided by the proximity of the current neighbor
+				vote = kNearest[0][1]/neighbor[1]
+			else:
+				#Size of vote is equal to the similarity of the current neighbor divided by the proximity of the most similar neighbor
+				vote = neighbor[1]/kNearest[0][1]
 		#If this neighbor's class has already been voted for by another neighbor,
 		if neighbor[2] in class_voting:
-			#Increment the number of votes
-			class_voting[neighbor[2]] = class_voting[neighbor[2]]+1
+			#Add this neighbor's vote to its class
+			class_voting[neighbor[2]] = class_voting[neighbor[2]]+vote
 		else:
 			#Add class to dictionary with one vote
-			class_voting[neighbor[2]] = 1
+			class_voting[neighbor[2]] = vote
 	
 	#Determine "most popular" class
 	predicted_class = max(class_voting, key=class_voting.get)
@@ -200,7 +209,6 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 
 					#pre-formatting training Iris data
 					normalized_train = []
-					
 					for row in iris_train[1:]:
 						#min-max normalization of each column
 						normal_sl = (float(row[0]) - train_sepal_length.min().item())/(train_sepal_length.max().item()-train_sepal_length.min().item())
@@ -245,7 +253,7 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 						result = [record_id, record[4]]
 
 						#Predict class of record from k-Nearest neighbors
-						result += kNNClassifier(kNearest, k)
+						result += kNNClassifier(kNearest, k, True, iris_measure)
 							
 						#Write row to output file
 						output.writerow(result)
@@ -387,7 +395,7 @@ with open('income_te.csv', "rt") as income_test_data:
 						result = [income_record[0], income_record[15]]
 
 						#Predict class of record from k-Nearest neighbors
-						result += kNNClassifier(kNearest, k)
+						result += kNNClassifier(kNearest, k, True, income_measure)
 							
 						#Write row to output file
 						output.writerow(result)
