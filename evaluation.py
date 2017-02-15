@@ -1,6 +1,8 @@
 import csv
-import knn
 import numpy
+from sklearn.metrics import roc_curve, auc
+import matplotlib.pyplot as plt
+import random
 
 #returns confusion matrix
 #params: cvs reader for input file, array of class labels
@@ -12,19 +14,36 @@ def confusion_matirx(reader, labels):
 		actual.append(row['Actual Class'])
 		predicted.append(row['Predicted Class'])
 
+	#roc_curve(actual, predicted)
+
 	conversion = {}
 	x = 0
 	for label in labels:
 		conversion[label] = x
 		x +=1
 
+	print(conversion)
 	actual = numpy.array(actual)
 	predicted = numpy.array(predicted)
 	conf_matrix = numpy.zeros((len(labels), len(labels)))
 	for actual_class, predicted_class in zip(actual, predicted):
 		conf_matrix[conversion[actual_class]][conversion[predicted_class]] +=1
-	
+	print(conf_matrix)
 	return conf_matrix
+
+def roc_curve(actual, predicted):
+	false_positive_rate, true_positive_rate, thresholds = roc_curve(actual, predicted)
+	roc_auc = auc(false_positive_rate, true_positive_rate)
+	plt.title('Receiver Operating Characteristic')
+	plt.plot(false_positive_rate, true_positive_rate, 'b',
+	label='AUC = %0.2f'% roc_auc)
+	plt.legend(loc='lower right')
+	plt.plot([0,1],[0,1],'r--')
+	plt.xlim([-0.1,1.2])
+	plt.ylim([-0.1,1.2])
+	plt.ylabel('True Positive Rate')
+	plt.xlabel('False Positive Rate')
+	plt.show()
 
 #returns accuracy of a confusion matrix
 def accuracy(conf_matrix):
@@ -38,8 +57,7 @@ def accuracy(conf_matrix):
 				incorrect += conf_matrix[x][y]
 	return correct/(correct + incorrect)
 
-def classification_rate(conf_matrix):
-	pass
+
 
 #outputs evaluation metrics to Evaluation_Output
 def output_file():
