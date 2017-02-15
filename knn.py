@@ -77,7 +77,7 @@ def MaritalComparison(element1, element2, similarity):
 		else:
 			return Binary(element1, element2, similarity)
 	
-	elif "Married" not in element1:
+	else:
 		if "Married" not in element2:
 			if similarity:
 				return 1
