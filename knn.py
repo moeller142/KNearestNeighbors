@@ -94,6 +94,11 @@ def kNNClassifier(kNearest, k, weighted, measure):
 	'''
 	class_voting = {}
 
+	#Total number of votes to be used in posterior probability calculation
+	total = k #k by default
+	if weighted:
+		total = 0
+
 	#For each of k nearest neighbors,
 	for neighbor in kNearest:
 		#Determine the size of the vote this neighbor gets
@@ -105,6 +110,7 @@ def kNNClassifier(kNearest, k, weighted, measure):
 			else:
 				#Size of vote is equal to the similarity of the current neighbor divided by the proximity of the most similar neighbor
 				vote = neighbor[1]/kNearest[0][1]
+			total += vote
 		#If this neighbor's class has already been voted for by another neighbor,
 		if neighbor[2] in class_voting:
 			#Add this neighbor's vote to its class
@@ -117,7 +123,7 @@ def kNNClassifier(kNearest, k, weighted, measure):
 	predicted_class = max(class_voting, key=class_voting.get)
 
 	#Calculate posterior probability
-	posterior = class_voting[predicted_class]/k
+	posterior = class_voting[predicted_class]/total
 
 	return [predicted_class, posterior]
 
