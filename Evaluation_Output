@@ -4,9 +4,18 @@ Confusion Matrix
 [[ 20.   0.   0.]
  [  0.  17.  13.]
  [  0.   0.  20.]]
+accuracy = 0.814285714286error rate = 0.185714285714
 
 Income Dataset:
 
 Confusion Matrix
 [[ 208.   80.]
  [   0.    0.]]
+accuracy = 0.722222222222
+error rate = 0.277777777778
+True Positive =208.0
+True Negative =0.0
+False Negative =80.0
+False Positive =0.0
+Recall =1.0
+Precision =0.722222222222
