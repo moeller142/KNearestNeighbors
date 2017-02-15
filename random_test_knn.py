@@ -161,8 +161,6 @@ if len(sys.argv) > 3:
 with open('Iris_Test.csv', "rt") as iris_test_data:
 	iris_test = csv.reader(iris_test_data)
 	iris_test = list(iris_test)
-	#Generate random subset of 25% of test records:
-	iris_test = randomListGenerator(iris_test[1:])
 
 	with open('Iris_Test.csv', "rt") as panda_iris_test_data:
 		#Open test data with pandas library to provide ability to read entire columns at a time
@@ -172,6 +170,8 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 		with open('Iris.csv', "rt") as iris_train_data:
 			iris_train = csv.reader(iris_train_data)
 			iris_train = list(iris_train)
+			#Generate random subset of 25% of training records:
+			iris_train = randomListGenerator(iris_train[1:])
 
 			with open('Iris.csv', "rt") as panda_iris_train_data:
 				#Open training data with pandas library to provide ability to read entire columns at a time
@@ -205,7 +205,7 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 					#pre-formatting test Iris data
 					normalized_test = []
 					
-					for row in iris_test:
+					for row in iris_test[1:]:
 						#min-max normalization of each column in combined Iris data set
 						normal_sl = (float(row[0]) - sepal_length.min().item())/(sepal_length.max().item()-sepal_length.min().item())
 						normal_sw = (float(row[1]) - sepal_width.min().item())/(sepal_width.max().item()-sepal_width.min().item())
@@ -218,7 +218,7 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 
 					#pre-formatting training Iris data
 					normalized_train = []
-					for row in iris_train[1:]:
+					for row in iris_train:
 						#min-max normalization of each column in combined Iris data set
 						normal_sl = (float(row[0]) - sepal_length.min().item())/(sepal_length.max().item()-sepal_length.min().item())
 						normal_sw = (float(row[1]) - sepal_width.min().item())/(sepal_width.max().item()-sepal_width.min().item())
@@ -274,8 +274,6 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 with open('income_te.csv', "rt") as income_test_data:
 	income_test = csv.reader(income_test_data)
 	income_test = list(income_test)
-	#Generate random subset of 25% of test records:
-	income_test = randomListGenerator(income_test[1:])
 
 	with open('income_te.csv', "rt") as panda_income_test_data:
 		#Open test data with pandas library to provide ability to read entire columns at a time
@@ -285,6 +283,8 @@ with open('income_te.csv', "rt") as income_test_data:
 		with open('income_tr.csv', "rt") as income_train_data:
 			income_train = csv.reader(income_train_data)
 			income_train = list(income_train)
+			#Generate random subset of 25% of training records:
+			income_train = randomListGenerator(income_train[1:])
 
 			with open('income_tr.csv', "rt") as panda_income_train_data:
 				#Open training data with pandas library to provide ability to read entire columns at a time
@@ -324,7 +324,7 @@ with open('income_te.csv', "rt") as income_test_data:
 					#pre-formatting test Income data
 					normalized_test = []
 
-					for row in income_test:
+					for row in income_test[1:]:
 						#min-max normalization of each column
 						normal_age = (float(row[1]) - age.min().item())/(age.max().item()-age.min().item())
 						normal_fnlwgt = (float(row[3]) - fnlwgt.min().item())/(fnlwgt.max().item()-fnlwgt.min().item())
@@ -338,7 +338,7 @@ with open('income_te.csv', "rt") as income_test_data:
 					#pre-formatting training Income data
 					normalized_train = []
 
-					for row in income_train[1:]:
+					for row in income_train:
 						#min-max normalization of each column
 						normal_age = (float(row[1]) - age.min().item())/(age.max().item()-age.min().item())
 						normal_fnlwgt = (float(row[3]) - fnlwgt.min().item())/(fnlwgt.max().item()-fnlwgt.min().item())
