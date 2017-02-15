@@ -359,9 +359,9 @@ with open('income_te.csv', "rt") as income_test_data:
 								cos = Cosine(record, row)
 
 								#Compute similarities for categorical attributes
-								workclass = Binary(income_record[2], income_row[2], True)
+								workclass = WorkclassComparison(income_record[2], income_row[2], True)
 								#Drop Education categorical attribute (record[4]) since education_cat has already been included in continuous measurement
-								marital = Binary(income_record[6], income_row[6], True)
+								marital = MaritalComparison(income_record[6], income_row[6], True)
 								occupation = Binary(income_record[7], income_row[7], True)
 								relationship = Binary(income_record[8], income_row[8], True)
 								race = Binary(income_record[9], income_row[9], True)
