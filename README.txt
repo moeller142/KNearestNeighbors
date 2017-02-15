@@ -1,4 +1,4 @@
-File name: proximity.py
+File name: knn.py
 Author: Jennifer Barry
 
 Dependencies:
@@ -13,7 +13,7 @@ Input Data:
 
 Execution:
 	Once dependencies have been resolved, the program can be run from a linux command line with the following command:
-		python3 proximity.py <optional value of k> <optional indicator for preferred measurement> <secondary indicator>
+		python3 knn.py <optional value of k> <optional indicator for preferred measurement> <secondary indicator>
 	
 		<optional value of k> is expected to be an integer value specifying the number of "nearest neighbors" to include in the output.
 
@@ -29,10 +29,10 @@ Execution:
 		NOTE: While all bracketed arguments listed above are optional, they must be in the order listed if they are included.
 			For example, the program will fail if only a secondary indicator is provided without including the k value and first indicator.
 			Examples of proper input include:
-				- python3 proximity.py
-				- python3 proximity.py 3
-				- python3 proximity.py 10 C
-				- python3 proximity.py 6 E C
+				- python3 knn.py
+				- python3 knn.py 3
+				- python3 knn.py 10 C
+				- python3 knn.py 6 E C
 
 Behavior:
 	The program takes as input four data sets:
