@@ -1,5 +1,5 @@
 File name: knn.py
-Author: Jennifer Barry
+Authors: Jennifer Barry and Claudia Moeller
 
 Dependencies:
 	This program expects python3 to be installed.
