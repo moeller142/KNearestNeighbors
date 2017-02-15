@@ -356,6 +356,6 @@ with open('income_te.csv', "rt") as income_test_data:
 						output.writerow(result)
 
 						#Increment record ID
-						record_id += 1
+						record_number += 1
 
 
