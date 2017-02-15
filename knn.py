@@ -195,35 +195,42 @@ with open('Iris_Test.csv', "rt") as iris_test_data:
 					test_petal_length = panda_iris_test.petal_length
 					test_petal_width = panda_iris_test.petal_width
 
-					#pre-formatting test Iris data
-					normalized_test = []
-					
-					for row in iris_test[1:]:
-						#min-max normalization of each column
-						normal_sl = (float(row[0]) - test_sepal_length.min().item())/(test_sepal_length.max().item()-test_sepal_length.min().item())
-						normal_sw = (float(row[1]) - test_sepal_width.min().item())/(test_sepal_width.max().item()-test_sepal_width.min().item())
-						normal_pl = (float(row[2]) - test_petal_length.min().item())/(test_petal_length.max().item()-test_petal_length.min().item())
-						normal_pw = (float(row[3]) - test_petal_width.min().item())/(test_petal_width.max().item()-test_petal_width.min().item())
-						#Save normalized rows with class
-						normalized_test.append([normal_sl, normal_sw, normal_pl, normal_pw, row[4]])
-
 					#Create pandas dataframes for each column in training Iris data
 					train_sepal_length = panda_iris_train.sepal_length
 					train_sepal_width = panda_iris_train.sepal_width
 					train_petal_length = panda_iris_train[' petal_length']
 					train_petal_width = panda_iris_train[' petal_width']
 
+					#Concatenate pandas dataframes for each column to create combined Iris data
+					sepal_length = pandas.concat([test_sepal_length, train_sepal_length])
+					sepal_width = pandas.concat([test_sepal_width, train_sepal_width])
+					petal_length = pandas.concat([test_petal_length, train_petal_length])
+					petal_width = pandas.concat([test_petal_width, train_petal_width])
+
+					#pre-formatting test Iris data
+					normalized_test = []
+					
+					for row in iris_test[1:]:
+						#min-max normalization of each column in combined Iris data set
+						normal_sl = (float(row[0]) - sepal_length.min().item())/(sepal_length.max().item()-sepal_length.min().item())
+						normal_sw = (float(row[1]) - sepal_width.min().item())/(sepal_width.max().item()-sepal_width.min().item())
+						normal_pl = (float(row[2]) - petal_length.min().item())/(petal_length.max().item()-petal_length.min().item())
+						normal_pw = (float(row[3]) - petal_width.min().item())/(petal_width.max().item()-petal_width.min().item())
+						#Save normalized rows with class
+						normalized_test.append([normal_sl, normal_sw, normal_pl, normal_pw, row[4]])
+
+					
+
 					#pre-formatting training Iris data
 					normalized_train = []
 					for row in iris_train[1:]:
-						#min-max normalization of each column
-						normal_sl = (float(row[0]) - train_sepal_length.min().item())/(train_sepal_length.max().item()-train_sepal_length.min().item())
-						normal_sw = (float(row[1]) - train_sepal_width.min().item())/(train_sepal_width.max().item()-train_sepal_width.min().item())
-						normal_pl = (float(row[2]) - train_petal_length.min().item())/(train_petal_length.max().item()-train_petal_length.min().item())
-						normal_pw = (float(row[3]) - train_petal_width.min().item())/(train_petal_width.max().item()-train_petal_width.min().item())
+						#min-max normalization of each column in combined Iris data set
+						normal_sl = (float(row[0]) - sepal_length.min().item())/(sepal_length.max().item()-sepal_length.min().item())
+						normal_sw = (float(row[1]) - sepal_width.min().item())/(sepal_width.max().item()-sepal_width.min().item())
+						normal_pl = (float(row[2]) - petal_length.min().item())/(petal_length.max().item()-petal_length.min().item())
+						normal_pw = (float(row[3]) - petal_width.min().item())/(petal_width.max().item()-petal_width.min().item())
 						#Save normalized rows with class
 						normalized_train.append([normal_sl, normal_sw, normal_pl, normal_pw, row[4]])
-
 
 					#Initialize record ID (Iris data does not assign IDs)
 					record_id = 1
