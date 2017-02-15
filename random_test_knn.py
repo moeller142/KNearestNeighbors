@@ -350,7 +350,7 @@ with open('income_te.csv', "rt") as income_test_data:
 						normalized_train.append([normal_age, normal_fnlwgt, normal_education, normal_gain, normal_loss, normal_hpw])
 
 
-					record_number = 0
+					record_number = 1
 					#For each test record
 					for record in normalized_test:
 						#Retrieve corresponding row from full data set
@@ -359,7 +359,7 @@ with open('income_te.csv', "rt") as income_test_data:
 						kNearest = []
 
 						#Initialize row ID
-						row_number = 1
+						row_number = 0
 						#Compare test record to each row in training data set
 						for row in normalized_train:
 							#Retrieve corresponding row from full data set
