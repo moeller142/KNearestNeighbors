@@ -347,7 +347,7 @@ with open('income_te.csv', "rt") as income_test_data:
 							row_number += 1
 
 						#Add record ID and actual class to result row
-						result = [record_id, income_record[15]]
+						result = [income_record[0], income_record[15]]
 
 						#Predict class of record from k-Nearest neighbors
 						result += kNNClassifier(kNearest, k)
