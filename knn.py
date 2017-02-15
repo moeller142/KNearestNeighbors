@@ -301,12 +301,28 @@ with open('income_te.csv', "rt") as income_test_data:
 					output.writerow(['ID', 'Actual Class', 'Predicted Class', 'Posterior Probability'])
 
 					#Create pandas dataframes for each continuous attribute's column in test Income data
-					age = panda_income_test.age
-					fnlwgt = panda_income_test.fnlwgt
-					education = panda_income_test.education_cat
-					gain = panda_income_test.capital_gain
-					loss = panda_income_test.capital_loss
-					hpw = panda_income_test.hour_per_week
+					test_age = panda_income_test.age
+					test_fnlwgt = panda_income_test.fnlwgt
+					test_education = panda_income_test.education_cat
+					test_gain = panda_income_test.capital_gain
+					test_loss = panda_income_test.capital_loss
+					test_hpw = panda_income_test.hour_per_week
+
+					#Create pandas dataframes for each continuous attribute's column in training Income data
+					train_age = panda_income_train.age
+					train_fnlwgt = panda_income_train.fnlwgt
+					train_education = panda_income_train.education_cat
+					train_gain = panda_income_train.capital_gain
+					train_loss = panda_income_train.capital_loss
+					train_hpw = panda_income_train.hour_per_week
+
+					#Concatenate pandas dataframes for each column to create combined Income data
+					age = pandas.concat([test_age, train_age])
+					fnlwgt = pandas.concat([test_fnlwgt, train_fnlwgt])
+					education = pandas.concat([test_education, train_education])
+					gain = pandas.concat([test_gain, train_gain])
+					loss = pandas.concat([test_loss, train_loss])
+					hpw = pandas.concat([test_hpw, train_hpw])
 
 					#pre-formatting test Income data
 					normalized_test = []
