@@ -370,7 +370,7 @@ with open('income_te.csv', "rt") as income_test_data:
 
 								#Compute average similarity by weighting each attribute
 								#out of 13 total attributes, 6 were included in the Cosine similarity. Weight accordingly.
-								proximity = ((6/13)*euclidean)+((1/13)*(workclass+education+education_cat+marital+occupation+relationship+race+gender+country))
+								proximity = ((6/13)*cos)+((1/13)*(workclass+marital+occupation+relationship+race+gender+country))
 
 								#Add record ID, proximity, and class for row as tuple to list
 								kNearest.append((str(income_row[0]), proximity, income_row[15]))
