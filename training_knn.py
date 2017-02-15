@@ -106,7 +106,10 @@ def kNNClassifier(kNearest, k, weighted, measure):
 		if weighted:
 			if measure == "E":
 				#Size of vote is equal to the distance of the nearest neighbor divided by the proximity of the current neighbor
-				vote = kNearest[0][1]/neighbor[1]
+				if neighbor[1] = 0:
+					vote = 1
+				else:
+					vote = kNearest[0][1]/neighbor[1]
 			else:
 				#Size of vote is equal to the similarity of the current neighbor divided by the proximity of the most similar neighbor
 				vote = neighbor[1]/kNearest[0][1]
