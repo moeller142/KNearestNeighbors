@@ -4,14 +4,15 @@ import sys
 import pandas
 import random
 
-def Euclidean(record, row):
-	'''
-	Calculates Euclidean distance between two records with an arbitrary, identical number of dimensions
-	'''
+def Euclidean(p1, p2):
 	distance = 0
-	for i in range(0,len(record)):
-			distance += abs(record[i]-row[i])**2
+
+	for key in p1.keys()
+		val1 = p1[key]
+		val2 = p2[key]
+		distance += abs(val1-val2)**2
 	distance = math.sqrt(distance)
+	
 	return distance
 
 def kmeans(k, reader):
@@ -19,7 +20,6 @@ def kmeans(k, reader):
 
 	#column_header->(min, max) of each attribute 
 	attribute_limits = find_attribute_limits(reader);
-	print(attribute_limits)
 
 	#list of centroids, k-tuples 
 	print(k)
@@ -32,13 +32,24 @@ def kmeans(k, reader):
 		centroids.append(point)
 
 	previous_centroids = centroids
-	print(centroids)
-	print(attribute_limits)
 	times_unchanged = 0
-	
-	'''while (times_unchanged <3){
 
-	}'''
+	while (times_unchanged <3):
+		for row in reader.iterrows():
+			point = row[1]
+			min_distance = 100
+			cluster = 0;
+			for centroid in centroids:
+				distance = Euclidean(point, centroid)
+				if(distance<min_distance):
+					min_distance = distance;
+					point['guessed_cluster'] = cluster
+				cluster += 1;
+
+		for row in reader.iterrows():
+
+
+	
 
 def find_attribute_limits(reader):
 	#dictionary of attribute ids -> (max, min) of the attribute values
@@ -68,8 +79,6 @@ def main():
 	with open(file_name) as data:
 		reader = pandas.read_csv(data)
 
-	print(sys.argv[1])
-	print(int(sys.argv[1]))
 	kmeans(int(sys.argv[1]), reader)
 
 if __name__ == "__main__":main()
