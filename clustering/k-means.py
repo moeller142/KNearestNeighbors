@@ -4,6 +4,7 @@ import sys
 import pandas
 import random
 import math 
+import copy
 
 #Euclidean distance between p1 and p2, ONLY USES ATTRIBUTRES PRESENT IN P1
 def Euclidean(p1, p2):
@@ -32,7 +33,6 @@ def kmeans(k, reader):
 		centroids.append(point)
 
 	times_unchanged = 0
-	print(centroids)
 	attributes = centroids[0].keys();
 
 	reader['guessed_cluster'] = -1
@@ -49,9 +49,8 @@ def kmeans(k, reader):
 					min_distance = distance;
 					reader.set_value(id,'guessed_cluster', cluster)
 				cluster += 1;
-			print('guessed cluster', reader.ix[id]['guessed_cluster'])
 
-		previous_centroids = centroids
+		previous_centroids = copy.deepcopy(centroids)
 		print('previous centroids ', previous_centroids)
 		print('centroids ', centroids)
 		#make centroids zero
@@ -60,6 +59,7 @@ def kmeans(k, reader):
 				centroid[attribute] = 0 
 
 		print('centroids 2 ', centroids)
+		print('previous centroids 1.5', previous_centroids)
 
 		for row in reader.iterrows():
 			point = row[1]
@@ -83,11 +83,13 @@ def kmeans(k, reader):
 		for centroid, previous_centroid in zip(centroids, previous_centroids):
 			if centroid != previous_centroid:
 				unchanged = False
+				if times_unchanged!= 0:
+					times_unchanged = 0
 
 		if(unchanged):
 			print('unchanged');
 			times_unchanged+=1
-
+			print('times unchanged ', times_unchanged)
 
 def find_attribute_limits(reader):
 	#dictionary of attribute ids -> (max, min) of the attribute values
