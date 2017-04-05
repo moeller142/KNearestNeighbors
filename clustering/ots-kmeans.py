@@ -78,16 +78,17 @@ def kMeans(k, records):
 
 	return [SSE, SSB]
 
-def dbSCAN(records, clusters):
-	dbscan = DBSCAN()
+'''
+def dbSCAN(records):
+	dbscan = DBSCAN(eps=0.3, min_samples=10)
 
-	prediction = dbscan.fit_predict(records, clusters)
+	prediction = dbscan.fit_predict(records)
 
 	print(dbscan.core_sample_indices_)
 	SSE = sse(records, prediction, dbscan.core_sample_indices_)
 
 	return SSE
-
+'''
 
 #Open CSV file containing data set
 with open('wine.csv', "rt") as wine_data:
@@ -145,7 +146,7 @@ with open('TwoDimEasy.csv', "rt") as easy_data:
 	kSS = kMeans(2, records)
 	print("k-means SSE:", kSS[0], "SSB:", kSS[1])
 
-	#dSS = dbSCAN(records, clusters)
+	#dSS = dbSCAN(records)
 	#print("DBSCAN SSE:", dSS)
 
 
