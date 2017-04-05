@@ -122,11 +122,29 @@ def find_attribute_limits_and_mean(reader):
 
 	return (limits, means)
 
+def get_true_centroids(key, reader):
+	true_reader = reader.drop('guessed_cluster', 1)
+	clusters = {}
+	for x in list(set(true_reader[key].values)):
+		clusters[x] = true_reader.loc[true_reader[key] == x]
+	cluster_centroids = {}
+	for cluster in clusters:
+		centroids, attribute_means, cluster_totals = kmeans(1,clusters[cluster])
+		cluster_centroids[cluster] = centroids[0]
+	return cluster_centroids	
+
 def sse(reader, centroids):
 	SSE = 0
 	cluster_SSE = {}
+	true_cluster_SSE = {}
+	if 'cluster' in reader.columns:
+		key = 'cluster'
+	else:
+		key = 'class'
+	true_centroids = get_true_centroids(key, reader)
 	for row in reader.iterrows():
 		point = row[1]
+		
 		guessed_cluster = int(point['guessed_cluster'])
 		centroid = centroids[guessed_cluster]
 		distance = Euclidean(centroid, point)
@@ -137,7 +155,19 @@ def sse(reader, centroids):
 			cluster_SSE[guessed_cluster] += se
 		else:
 			cluster_SSE[guessed_cluster] = se
+
+		cluster = point[key]
+		centroid = true_centroids[cluster]
+		distance = Euclidean(centroid, point)
+		se = math.pow(distance, 2)
+		SSE += se
+
+		if cluster in true_cluster_SSE:
+			true_cluster_SSE[cluster] += se
+		else:
+			true_cluster_SSE[cluster] = se
 	print("Cluster SSEs:", cluster_SSE)
+	print("True Cluster SSEs", true_cluster_SSE)
 	return SSE
 
 def ssb(centroids, cluster_totals, attribute_means):
@@ -177,7 +207,7 @@ def main():
 	if(sys.argv[2] == '3'):
 		#If wine data set, try a number of different settings for k
 		k_ideal = sys.argv[1]
-		for k in range(4, 20):
+		for k in range(1, 20):
 			print("Testing k value:", k)
 			if k != sys.argv[1]:
 				centroids,attribute_means, cluster_totals = kmeans(k, reader)
