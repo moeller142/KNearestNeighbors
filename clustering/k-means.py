@@ -91,15 +91,18 @@ def kmeans(k, reader):
 			times_unchanged+=1
 			print('times unchanged ', times_unchanged)
 
-	with open('./output.csv', 'w') as output_file:
+	with open('./wine_output.csv', 'w') as output_file:
 		reader.to_csv(output_file)
+
+
+	return centroids
 
 def find_attribute_limits(reader):
 	#dictionary of attribute ids -> (max, min) of the attribute values
 	limits = {}
 
 	for header in reader.columns.values:
-		if header != 'ID' and header!= 'class' and header != 'cluster':
+		if header != 'ID' and header!= 'class' and header != 'cluster' and header!= 'class' and header != 'quality':
 			attribute_values = reader[header].tolist()
 			limits[header] = (min(attribute_values), max(attribute_values))
 
