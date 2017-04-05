@@ -91,7 +91,7 @@ def kmeans(k, reader):
 			times_unchanged+=1
 			print('times unchanged ', times_unchanged)
 
-	with open('./output_file.csv', 'w') as output_file:
+	with open('./output.csv', 'w') as output_file:
 		reader.to_csv(output_file)
 
 	return centroids;
@@ -122,9 +122,9 @@ def sse(reader, centroids):
 def main():
 	file_name = ''
 	if(sys.argv[2] == '1'):
-		file_name = './TwoDimEasy.csv'
+		file_name = './TwoDimEasyNormalized.csv'
 	elif(sys.argv[2] == '2'):
-		file_name = './TwoDimHard.csv'
+		file_name = './TwoDimHardNormalized.csv'
 	elif(sys.argv[2] == '3'):
 		file_name = './wine.csv'
 	else:
