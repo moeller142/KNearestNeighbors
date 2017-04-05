@@ -217,27 +217,5 @@ def main():
 	print("SSE:", SSE)
 	SSB = ssb(centroids, cluster_totals, attribute_means, reader)
 	print("SSB:", SSB)
-	TSS = SSE + SSB
-
-	if(sys.argv[2] == '3'):
-		#If wine data set, try a number of different settings for k
-		k_ideal = sys.argv[1]
-		for k in range(1, 20):
-			print("Testing k value:", k)
-			if k != sys.argv[1]:
-				centroids,attribute_means, cluster_totals = kmeans(k, reader)
-				kSSE = sse(reader, centroids)
-				kSSB = ssb(centroids, cluster_totals, attribute_means, reader)
-				kTSS = kSSE + kSSB
-
-				if kTSS < TSS and kSSB != 0:
-					k_ideal = k
-					SSE = kSSE
-					SSB = kSSB
-					TSS = kTSS
-		print("Optimal k value for wine:", k_ideal)
-		print("SSE:", SSE)
-		print("SSB:", SSB)
-
 
 if __name__ == "__main__":main()
