@@ -98,6 +98,7 @@ def kmeans(k, reader):
 	#centroids= list of dicts [{attibute:value}], attribute means= list of dicts [{attribute, mean}], cluster_totals = list of totals, corresponding with the index of the centroid
 	return (centroids, attribute_means, cluster_totals)
 
+
 def find_attribute_limits_and_mean(reader):
 	#dictionary of attribute ids -> (max, min) of the attribute values
 	limits = {}
@@ -121,8 +122,6 @@ def sse(reader, centroids):
 		SSE += math.pow(distance, 2)
 	return SSE
 
-#TODO: SSB
-
 #expects arguments of k, then 1 for easy, 2 for hard, and 3 for wine
 def main():
 	file_name = ''
@@ -141,7 +140,8 @@ def main():
 
 	centroids,attribute_means, cluster_totals = kmeans(int(sys.argv[1]), reader)
 
-	#SSE = sse(reader, centroids)
-	#print("SSE:", SSE)
+	SSE = sse(reader, centroids)
+	print("SSE:", SSE)
+
 
 if __name__ == "__main__":main()
