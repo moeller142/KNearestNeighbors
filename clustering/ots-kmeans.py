@@ -1,4 +1,5 @@
 from sklearn.cluster import KMeans
+from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import MinMaxScaler
 import sklearn.metrics as metrics
 from sklearn.model_selection import cross_val_score
@@ -36,32 +37,34 @@ def ssb(clusters, centroids, overall_centroid):
 		SSB += size*(math.pow(distance,2))
 	return SSB
 
-def kMeans(k, records, classes):
+def kMeans(k, records):
 	#TODO parameters? Do we tell it how many clusters because we know the data set?
 	kmeans = KMeans(n_clusters=k)
 
-	prediction = kmeans.fit_predict(records, classes)
-	ars = metrics.adjusted_rand_score(classes, prediction)
+	prediction = kmeans.fit_predict(records)
+	'''
+	ars = metrics.adjusted_rand_score(clusters, prediction)
 	print("Adjusted Rand Index:", ars)
-	ami = metrics.adjusted_mutual_info_score(classes, prediction)
+	ami = metrics.adjusted_mutual_info_score(clusters, prediction)
 	print("Adjusted Mutual Information Score:", ami)
-	homogeneity = metrics.homogeneity_score(classes, prediction)
+	homogeneity = metrics.homogeneity_score(clusters, prediction)
 	print("Homogeneity Score:", homogeneity)
-	completeness = metrics.completeness_score(classes, prediction)
+	completeness = metrics.completeness_score(clusters, prediction)
 	print("Completeness Score:", completeness)
-	vMeasure = metrics.v_measure_score(classes, prediction)
+	vMeasure = metrics.v_measure_score(clusters, prediction)
 	print("V-measure:", vMeasure)
 	#TODO: other performance measures??
+	'''
 
-	print(kmeans.score(records))
+	#NOTE! Abs value of this = SSE
+	#print(kmeans.score(records))
 
 	SSE = sse(records, prediction, kmeans.cluster_centers_)
 
 	#SSB
 	k1 = KMeans(n_clusters=1)
-	k1.fit_predict(records, classes)
+	k1.fit_predict(records)
 	overall_centroid = k1.cluster_centers_[0]
-	print(overall_centroid)
 
 	clusters = {}
 	for num in prediction:
@@ -75,24 +78,54 @@ def kMeans(k, records, classes):
 
 	return [SSE, SSB]
 
+def dbSCAN(records, clusters):
+	dbscan = DBSCAN()
+
+	prediction = dbscan.fit_predict(records, clusters)
+
+	print(dbscan.core_sample_indices_)
+	SSE = sse(records, prediction, dbscan.core_sample_indices_)
+
+	return SSE
+
+
 #Open CSV file containing data set
 with open('wine.csv', "rt") as wine_data:
 	wine = csv.reader(wine_data)
 	wine = list(wine)
 
 	records = []
-	classes = []
+	clusters = []
 	for record in wine[1:]:
 		records.append(numpy.array(record[1:12]).astype(numpy.float))
-		classes.append(int(record[12]))
+		clusters.append(int(record[12]))
 
 	min_max = MinMaxScaler(feature_range=(0, 1), copy=False)
 	records = min_max.fit_transform(records)
 
 	print("Wine dataset")
-	SS = kMeans(2, records, classes)
-	print("SSE:", SS[0])
-	print("SSB:", SS[1])
+	
+
+	k_ideal = 2
+	SS = kMeans(2, records)
+	SSE = SS[0]
+	SSB = SS[1]
+	TSS = SSE + SSB
+	for k in range(3, 20):
+		print(k)
+		kSS = kMeans(k, records)
+		kTSS = kSS[0]+kSS[1]
+
+		if kTSS < TSS:
+			k_ideal = k
+			TSS = kTSS
+			SSE = kSS[0]
+			SSB = kSS[1]
+	print("k value:", k_ideal)
+	print("k-means SSE:", kSS[0], "SSB:", kSS[1])
+
+	#dSS = dbSCAN(records, clusters)
+	#print("DBSCAN SSE:", dSS)
 
 #Open CSV file containing data set
 with open('TwoDimEasy.csv', "rt") as easy_data:
@@ -100,18 +133,20 @@ with open('TwoDimEasy.csv', "rt") as easy_data:
 	easy = list(easy)
 
 	records = []
-	classes = []
+	clusters = []
 	for record in easy[1:]:
 		records.append(numpy.array(record[1:3]).astype(numpy.float))
-		classes.append(record[3])
+		clusters.append(record[3])
 
 	min_max = MinMaxScaler(feature_range=(0, 1), copy=False)
 	records = min_max.fit_transform(records)
 
 	print("Easy dataset")
-	SS = kMeans(2, records, classes)
-	print("SSE:", SS[0])
-	print("SSB:", SS[1])
+	kSS = kMeans(2, records)
+	print("k-means SSE:", kSS[0], "SSB:", kSS[1])
+
+	#dSS = dbSCAN(records, clusters)
+	#print("DBSCAN SSE:", dSS)
 
 
 #Open CSV file containing data set
@@ -120,15 +155,17 @@ with open('TwoDimHard.csv', "rt") as hard_data:
 	hard = list(hard)
 
 	records = []
-	classes = []
+	clusters = []
 	for record in hard[1:]:
 		records.append(numpy.array(record[1:3]).astype(numpy.float))
-		classes.append(record[3])
+		clusters.append(record[3])
 
 	min_max = MinMaxScaler(feature_range=(0, 1), copy=False)
 	records = min_max.fit_transform(records)
 
 	print("Hard dataset")
-	SS = kMeans(4, records, classes)
-	print("SSE:", SS[0])
-	print("SSB:", SS[1])
+	kSS = kMeans(4, records)
+	print("k-means SSE:", kSS[0], "SSB:", kSS[1])
+
+	#dSS = dbSCAN(records, clusters)
+	#print("DBSCAN SSE:", dSS)
