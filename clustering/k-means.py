@@ -61,16 +61,22 @@ def kmeans(k, reader):
 			for attribute in attributes:
 				centroid[attribute] = 0 
 
+		cluster_totals = []
+		for i in range(0,k):
+			cluster_totals.append(0)
+
 		for row in reader.iterrows():
 			point = row[1]
 			for i in range (0,k):
 				if point['guessed_cluster'] == i:
+					cluster_totals[i] += 1
 					for attribute in attributes:
 						centroids[i][attribute] += point[attribute]
 
-		for centroid in centroids:
+		for i in range(0,k):
+			centroid = centroids[i]
 			for attribute in attributes:
-				centroid[attribute] /= reader.shape[0]
+				centroid[attribute] /= cluster_totals[i]
 
 		unchanged = True
 
@@ -92,7 +98,7 @@ def kmeans(k, reader):
 				cluster_totals[i] += 1
 
 
-	with open('./wine_output.csv', 'w') as output_file:
+	with open('./output_hard_norm2.csv', 'w') as output_file:
 		reader.to_csv(output_file)
 
 	#centroids= list of dicts [{attibute:value}], attribute means= list of dicts [{attribute, mean}], cluster_totals = list of totals, corresponding with the index of the centroid
