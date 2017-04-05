@@ -20,12 +20,20 @@ def Euclidean(record1, record2):
 
 def sse(records, predictions, centroids):
 	SSE = 0
+	cluster_SSE = {}
 	for i in range(0,len(records)):
 		record = records[i]
 		prediction = predictions[i]
 		centroid = centroids[prediction]
 		distance = Euclidean(centroid, record)
-		SSE += math.pow(distance, 2)
+		se = math.pow(distance, 2)
+		SSE += se
+
+		if prediction in cluster_SSE:
+			cluster_SSE[prediction] += se
+		else:
+			cluster_SSE[prediction] = se
+	print(cluster_SSE)
 	return SSE
 
 def ssb(clusters, centroids, overall_centroid):
@@ -39,27 +47,13 @@ def ssb(clusters, centroids, overall_centroid):
 
 def kMeans(k, records):
 	#TODO parameters? Do we tell it how many clusters because we know the data set?
-	kmeans = KMeans(n_clusters=k)
+	kmeans = KMeans(n_clusters=k, init='random', n_init=10, max_iter=300, tol=0.0001, precompute_distances='auto', verbose=0, random_state=None, copy_x=True, n_jobs=1, algorithm='full')
 
 	prediction = kmeans.fit_predict(records)
-	'''
-	ars = metrics.adjusted_rand_score(clusters, prediction)
-	print("Adjusted Rand Index:", ars)
-	ami = metrics.adjusted_mutual_info_score(clusters, prediction)
-	print("Adjusted Mutual Information Score:", ami)
-	homogeneity = metrics.homogeneity_score(clusters, prediction)
-	print("Homogeneity Score:", homogeneity)
-	completeness = metrics.completeness_score(clusters, prediction)
-	print("Completeness Score:", completeness)
-	vMeasure = metrics.v_measure_score(clusters, prediction)
-	print("V-measure:", vMeasure)
-	#TODO: other performance measures??
-	'''
 
-	#NOTE! Abs value of this = SSE
-	#print(kmeans.score(records))
+	score_SSE = abs(kmeans.score(records))
 
-	SSE = sse(records, prediction, kmeans.cluster_centers_)
+	calc_SSE = sse(records, prediction, kmeans.cluster_centers_)
 
 	#SSB
 	k1 = KMeans(n_clusters=1)
@@ -76,19 +70,7 @@ def kMeans(k, records):
 	SSB = ssb(clusters, kmeans.cluster_centers_, overall_centroid)
 
 
-	return [SSE, SSB]
-
-'''
-def dbSCAN(records):
-	dbscan = DBSCAN(eps=0.3, min_samples=10)
-
-	prediction = dbscan.fit_predict(records)
-
-	print(dbscan.core_sample_indices_)
-	SSE = sse(records, prediction, dbscan.core_sample_indices_)
-
-	return SSE
-'''
+	return [score_SSE, calc_SSE, SSB]
 
 #Open CSV file containing data set
 with open('wine.csv', "rt") as wine_data:
@@ -109,24 +91,23 @@ with open('wine.csv', "rt") as wine_data:
 
 	k_ideal = 2
 	SS = kMeans(2, records)
-	SSE = SS[0]
-	SSB = SS[1]
+	calc_SSE = SS[0]
+	SSE = SS[1]
+	SSB = SS[2]
 	TSS = SSE + SSB
-	for k in range(3, 20):
+	for k in range(1, 20):
 		print(k)
 		kSS = kMeans(k, records)
-		kTSS = kSS[0]+kSS[1]
+		kTSS = kSS[1]+kSS[2]
 
 		if kTSS < TSS:
 			k_ideal = k
 			TSS = kTSS
-			SSE = kSS[0]
-			SSB = kSS[1]
+			calc_SSE = kSS[0]
+			SSE = kSS[1]
+			SSB = kSS[2]
 	print("k value:", k_ideal)
-	print("k-means SSE:", kSS[0], "SSB:", kSS[1])
-
-	#dSS = dbSCAN(records, clusters)
-	#print("DBSCAN SSE:", dSS)
+	print("OTS SSE:", calc_SSE, "SSE:", SSE, "SSB:", SSB)
 
 #Open CSV file containing data set
 with open('TwoDimEasy.csv', "rt") as easy_data:
@@ -143,11 +124,8 @@ with open('TwoDimEasy.csv', "rt") as easy_data:
 	records = min_max.fit_transform(records)
 
 	print("Easy dataset")
-	kSS = kMeans(2, records)
-	print("k-means SSE:", kSS[0], "SSB:", kSS[1])
-
-	#dSS = dbSCAN(records)
-	#print("DBSCAN SSE:", dSS)
+	SS = kMeans(2, records)
+	print("OTS SSE:", SS[0], "SSE:", SS[1], "SSB:", SS[2])
 
 
 #Open CSV file containing data set
@@ -165,8 +143,5 @@ with open('TwoDimHard.csv', "rt") as hard_data:
 	records = min_max.fit_transform(records)
 
 	print("Hard dataset")
-	kSS = kMeans(4, records)
-	print("k-means SSE:", kSS[0], "SSB:", kSS[1])
-
-	#dSS = dbSCAN(records, clusters)
-	#print("DBSCAN SSE:", dSS)
+	SS = kMeans(4, records)
+	print("OTS SSE:", SS[0], "SSE:", SS[1], "SSB:", SS[2])
