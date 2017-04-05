@@ -25,8 +25,11 @@ def kmeans(k, reader):
 	limits_and_means = find_attribute_limits_and_mean(reader);
 
 	attribute_limits = limits_and_means[0]
-	attribute_means = limits_and_means[1]
-	print(attribute_means)
+	#Get means of all attributes and convert to single dictionary
+	attribute_means = limits_and_means[1][0]
+	for i in range (1, len(limits_and_means[1])):
+		attribute_means.update(limits_and_means[1][i])
+	#print("means:", attribute_means)
 
 	centroids = [] #list of dictionaries, [{attribute_name: value}]
 	for i in range(0, k):
@@ -55,7 +58,7 @@ def kmeans(k, reader):
 				cluster += 1;
 
 		previous_centroids = copy.deepcopy(centroids)
-		print('centroids ', centroids)
+		#print('centroids ', centroids)
 		#make centroids zero
 		for centroid in centroids:
 			for attribute in attributes:
@@ -95,7 +98,7 @@ def kmeans(k, reader):
 	with open('./wine_output.csv', 'w') as output_file:
 		reader.to_csv(output_file)
 
-	#centroids= list of dicts [{attibute:value}], attribute means= list of dicts [{attribute, mean}], cluster_totals = list of totals, corresponding with the index of the centroid
+	#centroids= list of dicts [{attibute:value}], attribute means= dict {attribute: mean}, cluster_totals = list of totals, corresponding with the index of the centroid
 	return (centroids, attribute_means, cluster_totals)
 
 
@@ -122,6 +125,16 @@ def sse(reader, centroids):
 		SSE += math.pow(distance, 2)
 	return SSE
 
+def ssb(centroids, cluster_totals, attribute_means):
+	SSB = 0
+	for i in range(0, len(centroids)):
+		cluster_size = cluster_totals[i]
+		centroid = centroids[i]
+		distance = Euclidean(centroid, attribute_means)
+		SSB += cluster_size*(math.pow(distance,2))
+	return SSB
+
+
 #expects arguments of k, then 1 for easy, 2 for hard, and 3 for wine
 def main():
 	file_name = ''
@@ -142,6 +155,29 @@ def main():
 
 	SSE = sse(reader, centroids)
 	print("SSE:", SSE)
+	SSB = ssb(centroids, cluster_totals, attribute_means)
+	print("SSB:", SSB)
+	TSS = SSE + SSB
+
+	if(sys.argv[2] == '3'):
+		#If wine data set, try a number of different settings for k
+		k_ideal = sys.argv[1]
+		for k in range(1, 7):
+			print(k)
+			if k != sys.argv[1]:
+				centroids,attribute_means, cluster_totals = kmeans(k, reader)
+				kSSE = sse(reader, centroids)
+				kSSB = ssb(centroids, cluster_totals, attribute_means)
+				kTSS = kSSE + kSSB
+
+				if kTSS < TSS:
+					k_ideal = k
+					SSE = kSSE
+					SSB = kSSB
+					TSS = kTSS
+		print("Optimal k value for wine:", k_ideal)
+		print("SSE:", SSE)
+		print("SSB:", SSB)
 
 
 if __name__ == "__main__":main()
