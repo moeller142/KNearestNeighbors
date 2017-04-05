@@ -177,7 +177,7 @@ def main():
 	if(sys.argv[2] == '3'):
 		#If wine data set, try a number of different settings for k
 		k_ideal = sys.argv[1]
-		for k in range(1, 7):
+		for k in range(4, 20):
 			print("Testing k value:", k)
 			if k != sys.argv[1]:
 				centroids,attribute_means, cluster_totals = kmeans(k, reader)
