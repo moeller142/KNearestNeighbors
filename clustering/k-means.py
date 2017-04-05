@@ -103,8 +103,8 @@ def kmeans(k, reader):
 			if cluster == i:
 				cluster_totals[i] += 1
 
-	with open('./easy_output_final.csv', 'w') as output_file:
-		reader.to_csv(output_file, columns = ID guessed_cluster)
+	with open('./output.csv', 'w') as output_file:
+		reader.to_csv(output_file, columns = ['ID', 'guessed_cluster'])
 	#centroids= list of dicts [{attibute:value}], attribute means= dict {attribute: mean}, cluster_totals = list of totals, corresponding with the index of the centroid
 	return (centroids, attribute_means, cluster_totals)
 
