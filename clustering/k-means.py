@@ -116,6 +116,8 @@ def sse(reader, centroids):
 		SSE += math.pow(distance, 2)
 	return SSE
 
+#TODO: SSB
+
 #expects arguments of k, then 1 for easy, 2 for hard, and 3 for wine
 def main():
 	file_name = ''
