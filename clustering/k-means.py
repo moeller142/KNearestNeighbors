@@ -125,7 +125,7 @@ def sse(reader, centroids):
 		centroid = centroids[guessed_cluster]
 		distance = Euclidean(centroid, point)
 		se = math.pow(distance, 2)
-		SSE += math.pow(distance, 2)
+		SSE += se
 
 		if guessed_cluster in cluster_SSE:
 			cluster_SSE[guessed_cluster] += se
