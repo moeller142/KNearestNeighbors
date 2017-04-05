@@ -163,14 +163,14 @@ def main():
 		#If wine data set, try a number of different settings for k
 		k_ideal = sys.argv[1]
 		for k in range(1, 7):
-			print("Testing value:", k)
+			print("Testing k value:", k)
 			if k != sys.argv[1]:
 				centroids,attribute_means, cluster_totals = kmeans(k, reader)
 				kSSE = sse(reader, centroids)
 				kSSB = ssb(centroids, cluster_totals, attribute_means)
 				kTSS = kSSE + kSSB
 
-				if kTSS < TSS:
+				if kTSS < TSS and kSSB != 0:
 					k_ideal = k
 					SSE = kSSE
 					SSB = kSSB
