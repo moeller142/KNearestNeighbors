@@ -151,7 +151,7 @@ def main():
 	with open(file_name) as data:
 		reader = pandas.read_csv(data)
 
-	centroids,attribute_means, cluster_totals = kmeans(int(sys.argv[1]), reader)
+	centroids, attribute_means, cluster_totals = kmeans(int(sys.argv[1]), reader)
 
 	SSE = sse(reader, centroids)
 	print("SSE:", SSE)
@@ -163,7 +163,7 @@ def main():
 		#If wine data set, try a number of different settings for k
 		k_ideal = sys.argv[1]
 		for k in range(1, 7):
-			print(k)
+			print("Testing value:", k)
 			if k != sys.argv[1]:
 				centroids,attribute_means, cluster_totals = kmeans(k, reader)
 				kSSE = sse(reader, centroids)
