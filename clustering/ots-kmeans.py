@@ -33,7 +33,7 @@ def sse(records, predictions, centroids):
 			cluster_SSE[prediction] += se
 		else:
 			cluster_SSE[prediction] = se
-	print(cluster_SSE)
+	print("Cluster SSEs:",cluster_SSE)
 	return SSE
 
 def ssb(clusters, centroids, overall_centroid):
@@ -70,7 +70,7 @@ def kMeans(k, records):
 	SSB = ssb(clusters, kmeans.cluster_centers_, overall_centroid)
 
 
-	return [score_SSE, calc_SSE, SSB]
+	return score_SSE, calc_SSE, SSB
 
 #Open CSV file containing data set
 with open('wine.csv', "rt") as wine_data:
@@ -90,24 +90,21 @@ with open('wine.csv', "rt") as wine_data:
 	
 
 	k_ideal = 2
-	SS = kMeans(2, records)
-	calc_SSE = SS[0]
-	SSE = SS[1]
-	SSB = SS[2]
+	score_SSE, SSE, SSB = kMeans(2, records)
 	TSS = SSE + SSB
 	for k in range(1, 20):
 		print(k)
-		kSS = kMeans(k, records)
-		kTSS = kSS[1]+kSS[2]
+		score_kSSE, kSSE, kSSB = kMeans(k, records)
+		kTSS = kSSE+kSSB
 
 		if kTSS < TSS:
 			k_ideal = k
 			TSS = kTSS
-			calc_SSE = kSS[0]
-			SSE = kSS[1]
-			SSB = kSS[2]
+			score_SSE = score_kSSE
+			SSE = kSSE
+			SSB = kSSB
 	print("k value:", k_ideal)
-	print("OTS SSE:", calc_SSE, "SSE:", SSE, "SSB:", SSB)
+	print("OTS SSE:", score_SSE, "SSE:", SSE, "SSB:", SSB)
 
 #Open CSV file containing data set
 with open('TwoDimEasy.csv', "rt") as easy_data:
@@ -143,5 +140,5 @@ with open('TwoDimHard.csv', "rt") as hard_data:
 	records = min_max.fit_transform(records)
 
 	print("Hard dataset")
-	SS = kMeans(4, records)
-	print("OTS SSE:", SS[0], "SSE:", SS[1], "SSB:", SS[2])
+	score_SSE, SSE, SSB = kMeans(4, records)
+	print("OTS SSE:", score_SSE, "SSE:", SSE, "SSB:", SSB)
