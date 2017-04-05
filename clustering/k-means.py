@@ -131,17 +131,18 @@ def get_true_centroids(key, reader):
 	for cluster in clusters:
 		centroids, attribute_means, cluster_totals = kmeans(1,clusters[cluster])
 		cluster_centroids[cluster] = centroids[0]
-	return cluster_centroids	
+	return cluster_centroids, cluster_totals	
 
 def sse(reader, centroids):
 	SSE = 0
 	cluster_SSE = {}
+	true_SSE = 0
 	true_cluster_SSE = {}
 	if 'cluster' in reader.columns:
 		key = 'cluster'
 	else:
 		key = 'class'
-	true_centroids = get_true_centroids(key, reader)
+	true_centroids, totals = get_true_centroids(key, reader)
 	for row in reader.iterrows():
 		point = row[1]
 		
@@ -160,7 +161,7 @@ def sse(reader, centroids):
 		centroid = true_centroids[cluster]
 		distance = Euclidean(centroid, point)
 		se = math.pow(distance, 2)
-		SSE += se
+		true_SSE += se
 
 		if cluster in true_cluster_SSE:
 			true_cluster_SSE[cluster] += se
@@ -168,15 +169,29 @@ def sse(reader, centroids):
 			true_cluster_SSE[cluster] = se
 	print("Cluster SSEs:", cluster_SSE)
 	print("True Cluster SSEs", true_cluster_SSE)
+	print("True SSE:", true_SSE)
 	return SSE
 
-def ssb(centroids, cluster_totals, attribute_means):
+def ssb(centroids, cluster_totals, attribute_means, reader):
 	SSB = 0
 	for i in range(0, len(centroids)):
 		cluster_size = cluster_totals[i]
 		centroid = centroids[i]
 		distance = Euclidean(centroid, attribute_means)
 		SSB += cluster_size*(math.pow(distance,2))
+
+	true_SSB = 0
+	if 'cluster' in reader.columns:
+		key = 'cluster'
+	else:
+		key = 'class'
+	true_centroids, totals = get_true_centroids(key, reader)
+	for cluster in true_centroids:
+		centroid = true_centroids[cluster]
+		distance = Euclidean(centroid, attribute_means)
+		true_SSB += cluster_size*(math.pow(distance,2))
+	print("True SSB:", true_SSB)
+
 	return SSB
 
 
@@ -200,7 +215,7 @@ def main():
 
 	SSE = sse(reader, centroids)
 	print("SSE:", SSE)
-	SSB = ssb(centroids, cluster_totals, attribute_means)
+	SSB = ssb(centroids, cluster_totals, attribute_means, reader)
 	print("SSB:", SSB)
 	TSS = SSE + SSB
 
@@ -212,7 +227,7 @@ def main():
 			if k != sys.argv[1]:
 				centroids,attribute_means, cluster_totals = kmeans(k, reader)
 				kSSE = sse(reader, centroids)
-				kSSB = ssb(centroids, cluster_totals, attribute_means)
+				kSSB = ssb(centroids, cluster_totals, attribute_means, reader)
 				kTSS = kSSE + kSSB
 
 				if kTSS < TSS and kSSB != 0:
