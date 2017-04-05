@@ -79,6 +79,9 @@ def kmeans(k, reader):
 		for i in range(0,k):
 			centroid = centroids[i]
 			for attribute in attributes:
+				if(cluster_totals[i] ==0):
+					sys.exit()
+				
 				centroid[attribute] /= cluster_totals[i]
 
 		unchanged = True
@@ -100,10 +103,8 @@ def kmeans(k, reader):
 			if cluster == i:
 				cluster_totals[i] += 1
 
-
 	with open('./easy_output_final.csv', 'w') as output_file:
-		reader.to_csv(output_file)
-
+		reader.to_csv(output_file, columns = ID guessed_cluster)
 	#centroids= list of dicts [{attibute:value}], attribute means= dict {attribute: mean}, cluster_totals = list of totals, corresponding with the index of the centroid
 	return (centroids, attribute_means, cluster_totals)
 
@@ -167,9 +168,6 @@ def sse(reader, centroids):
 			true_cluster_SSE[cluster] += se
 		else:
 			true_cluster_SSE[cluster] = se
-	print("Cluster SSEs:", cluster_SSE)
-	print("True Cluster SSEs", true_cluster_SSE)
-	print("True SSE:", true_SSE)
 	return SSE
 
 def ssb(centroids, cluster_totals, attribute_means, reader):
@@ -190,7 +188,6 @@ def ssb(centroids, cluster_totals, attribute_means, reader):
 		centroid = true_centroids[cluster]
 		distance = Euclidean(centroid, attribute_means)
 		true_SSB += cluster_size*(math.pow(distance,2))
-	print("True SSB:", true_SSB)
 
 	return SSB
 
@@ -214,8 +211,6 @@ def main():
 	centroids, attribute_means, cluster_totals = kmeans(int(sys.argv[1]), reader)
 
 	SSE = sse(reader, centroids)
-	print("SSE:", SSE)
 	SSB = ssb(centroids, cluster_totals, attribute_means, reader)
-	print("SSB:", SSB)
 
 if __name__ == "__main__":main()
