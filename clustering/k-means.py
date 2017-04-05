@@ -94,7 +94,6 @@ def kmeans(k, reader):
 	with open('./wine_output.csv', 'w') as output_file:
 		reader.to_csv(output_file)
 
-
 	return sse(reader, centroids)
 
 def find_attribute_limits(reader):
