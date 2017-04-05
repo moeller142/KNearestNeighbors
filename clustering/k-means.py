@@ -94,7 +94,8 @@ def kmeans(k, reader):
 	with open('./wine_output.csv', 'w') as output_file:
 		reader.to_csv(output_file)
 
-	return centroids
+
+	return sse(reader, centroids)
 
 def find_attribute_limits(reader):
 	#dictionary of attribute ids -> (max, min) of the attribute values
@@ -116,8 +117,6 @@ def sse(reader, centroids):
 		SSE += math.pow(distance, 2)
 	return SSE
 
-#TODO: SSB
-
 #expects arguments of k, then 1 for easy, 2 for hard, and 3 for wine
 def main():
 	file_name = ''
@@ -134,9 +133,7 @@ def main():
 	with open(file_name) as data:
 		reader = pandas.read_csv(data)
 
-	centroids = kmeans(int(sys.argv[1]), reader)
-
-	SSE = sse(reader, centroids)
-	print("SSE:", SSE)
+		SSE = kmeans(int(sys.argv[1]), reader)
+		print("SSE:" SSE)
 
 if __name__ == "__main__":main()
