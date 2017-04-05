@@ -91,6 +91,9 @@ def kmeans(k, reader):
 			times_unchanged+=1
 			print('times unchanged ', times_unchanged)
 
+	with open('./output_file.csv', 'w') as output_file:
+		reader.to_csv(output_file)
+
 def find_attribute_limits(reader):
 	#dictionary of attribute ids -> (max, min) of the attribute values
 	limits = {}
