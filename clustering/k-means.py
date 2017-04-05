@@ -44,7 +44,7 @@ def kmeans(k, reader):
 
 	reader['guessed_cluster'] = -1
 
-	while (times_unchanged <2): 
+	while (times_unchanged <1): 
 		for row in reader.iterrows(): 
 			point = row[1] #dictionary of attributes to values, includes extra
 			id = row[0]
@@ -101,7 +101,7 @@ def kmeans(k, reader):
 				cluster_totals[i] += 1
 
 
-	with open('./output_hard_norm2.csv', 'w') as output_file:
+	with open('./easy_output_final.csv', 'w') as output_file:
 		reader.to_csv(output_file)
 
 	#centroids= list of dicts [{attibute:value}], attribute means= dict {attribute: mean}, cluster_totals = list of totals, corresponding with the index of the centroid
@@ -115,7 +115,7 @@ def find_attribute_limits_and_mean(reader):
 	#list of dictionaries [{attribute:mean}]
 	means = []
 	for header in reader.columns.values:
-		if header != 'ID' and header!= 'class' and header != 'cluster' and header!= 'class' and header != 'quality':
+		if header != 'ID' and header!= 'class' and header != 'cluster' and header != 'quality':
 			attribute_values = reader[header].tolist()
 			limits[header] = (min(attribute_values), max(attribute_values))
 			means.append({header: (sum(attribute_values)/float(len(attribute_values)))})
