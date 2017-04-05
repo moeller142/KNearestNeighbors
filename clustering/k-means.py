@@ -130,7 +130,7 @@ def main():
 	elif(sys.argv[2] == '2'):
 		file_name = './TwoDimHardNormalized.csv'
 	elif(sys.argv[2] == '3'):
-		file_name = './wine.csv'
+		file_name = './wine_normalized.csv'
 	else:
 		print('invalid arguments\n')
 		return
