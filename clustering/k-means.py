@@ -94,6 +94,8 @@ def kmeans(k, reader):
 	with open('./output_file.csv', 'w') as output_file:
 		reader.to_csv(output_file)
 
+	return centroids;
+
 def find_attribute_limits(reader):
 	#dictionary of attribute ids -> (max, min) of the attribute values
 	limits = {}
@@ -104,6 +106,15 @@ def find_attribute_limits(reader):
 			limits[header] = (min(attribute_values), max(attribute_values))
 
 	return limits
+
+def sse(reader, centroids):
+	SSE = 0
+	for row in reader.iterrows():
+		point = row[1]
+		centroid = centroids[int(point['guessed_cluster'])]
+		distance = Euclidean(centroid, point)
+		SSE += math.pow(distance, 2)
+	return SSE
 
 #expects arguments of k, then 1 for easy, 2 for hard, and 3 for wine
 def main():
@@ -121,6 +132,9 @@ def main():
 	with open(file_name) as data:
 		reader = pandas.read_csv(data)
 
-	kmeans(int(sys.argv[1]), reader)
+	centroids = kmeans(int(sys.argv[1]), reader)
+
+	SSE = sse(reader, centroids)
+	print("SSE:", SSE)
 
 if __name__ == "__main__":main()
