@@ -118,11 +118,20 @@ def find_attribute_limits_and_mean(reader):
 
 def sse(reader, centroids):
 	SSE = 0
+	cluster_SSE = {}
 	for row in reader.iterrows():
 		point = row[1]
-		centroid = centroids[int(point['guessed_cluster'])]
+		guessed_cluster = int(point['guessed_cluster'])
+		centroid = centroids[guessed_cluster]
 		distance = Euclidean(centroid, point)
+		se = math.pow(distance, 2)
 		SSE += math.pow(distance, 2)
+
+		if guessed_cluster in cluster_SSE:
+			cluster_SSE[guessed_cluster] += se
+		else:
+			cluster_SSE[guessed_cluster] = se
+	print("Cluster SSEs:", cluster_SSE)
 	return SSE
 
 def ssb(centroids, cluster_totals, attribute_means):
