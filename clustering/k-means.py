@@ -22,7 +22,11 @@ def kmeans(k, reader):
 	#create initialization points
 
 	#column_header->(min, max) of each attribute 
-	attribute_limits = find_attribute_limits(reader);
+	limits_and_means = find_attribute_limits_and_mean(reader);
+
+	attribute_limits = limits_and_means[0]
+	attribute_means = limits_and_means[1]
+	print(attribute_means)
 
 	centroids = [] #list of dictionaries, [{attribute_name: value}]
 	for i in range(0, k):
@@ -51,15 +55,11 @@ def kmeans(k, reader):
 				cluster += 1;
 
 		previous_centroids = copy.deepcopy(centroids)
-		print('previous centroids ', previous_centroids)
 		print('centroids ', centroids)
 		#make centroids zero
 		for centroid in centroids:
 			for attribute in attributes:
 				centroid[attribute] = 0 
-
-		print('centroids 2 ', centroids)
-		print('previous centroids 1.5', previous_centroids)
 
 		for row in reader.iterrows():
 			point = row[1]
@@ -68,15 +68,9 @@ def kmeans(k, reader):
 					for attribute in attributes:
 						centroids[i][attribute] += point[attribute]
 
-		print('centroids 3 ', centroids)
-
 		for centroid in centroids:
 			for attribute in attributes:
 				centroid[attribute] /= reader.shape[0]
-
-		print('centroids 4 ', centroids)
-		print('previous centroids 2', previous_centroids)
-
 
 		unchanged = True
 
@@ -87,25 +81,36 @@ def kmeans(k, reader):
 					times_unchanged = 0
 
 		if(unchanged):
-			print('unchanged');
 			times_unchanged+=1
-			print('times unchanged ', times_unchanged)
+
+	cluster_column = reader['guessed_cluster']	
+	cluster_totals = []
+	for i in range(0,k):
+		cluster_totals.append(0)
+		for cluster in cluster_column:
+			if cluster == i:
+				cluster_totals[i] += 1
+
 
 	with open('./wine_output.csv', 'w') as output_file:
 		reader.to_csv(output_file)
 
-	return centroids
+	#centroids= list of dicts [{attibute:value}], attribute means= list of dicts [{attribute, mean}], cluster_totals = list of totals, corresponding with the index of the centroid
+	return (centroids, attribute_means, cluster_totals)
 
-def find_attribute_limits(reader):
+def find_attribute_limits_and_mean(reader):
 	#dictionary of attribute ids -> (max, min) of the attribute values
 	limits = {}
 
+	#list of dictionaries [{attribute:mean}]
+	means = []
 	for header in reader.columns.values:
 		if header != 'ID' and header!= 'class' and header != 'cluster' and header!= 'class' and header != 'quality':
 			attribute_values = reader[header].tolist()
 			limits[header] = (min(attribute_values), max(attribute_values))
+			means.append({header: (sum(attribute_values)/float(len(attribute_values)))})
 
-	return limits
+	return (limits, means)
 
 def sse(reader, centroids):
 	SSE = 0
@@ -134,9 +139,9 @@ def main():
 	with open(file_name) as data:
 		reader = pandas.read_csv(data)
 
-	centroids = kmeans(int(sys.argv[1]), reader)
+	centroids,attribute_means, cluster_totals = kmeans(int(sys.argv[1]), reader)
 
-	SSE = sse(reader, centroids)
-	print("SSE:", SSE)
+	#SSE = sse(reader, centroids)
+	#print("SSE:", SSE)
 
 if __name__ == "__main__":main()
