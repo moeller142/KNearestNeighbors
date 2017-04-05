@@ -27,11 +27,19 @@ def sse(records, predictions, centroids):
 		SSE += math.pow(distance, 2)
 	return SSE
 
+def ssb(clusters, centroids, overall_centroid):
+	SSB = 0
+	for i in range(0, len(centroids)):
+		size = clusters[i]
+		centroid = centroids[i]
+		distance = Euclidean(centroid, overall_centroid)
+		SSB += size*(math.pow(distance,2))
+	return SSB
+
 def kMeans(k, records, classes):
 	#TODO parameters? Do we tell it how many clusters because we know the data set?
 	kmeans = KMeans(n_clusters=k)
 
-	#prediction = cross_val_predict(kmeans, records, classes)
 	prediction = kmeans.fit_predict(records, classes)
 	ars = metrics.adjusted_rand_score(classes, prediction)
 	print("Adjusted Rand Index:", ars)
@@ -45,9 +53,27 @@ def kMeans(k, records, classes):
 	print("V-measure:", vMeasure)
 	#TODO: other performance measures??
 
+	print(kmeans.score(records))
+
 	SSE = sse(records, prediction, kmeans.cluster_centers_)
 
-	return SSE
+	#SSB
+	k1 = KMeans(n_clusters=1)
+	k1.fit_predict(records, classes)
+	overall_centroid = k1.cluster_centers_[0]
+	print(overall_centroid)
+
+	clusters = {}
+	for num in prediction:
+		if num in clusters:
+			clusters[num] += 1
+		else:
+			clusters[num] = 1
+
+	SSB = ssb(clusters, kmeans.cluster_centers_, overall_centroid)
+
+
+	return [SSE, SSB]
 
 #Open CSV file containing data set
 with open('wine.csv', "rt") as wine_data:
@@ -64,8 +90,9 @@ with open('wine.csv', "rt") as wine_data:
 	records = min_max.fit_transform(records)
 
 	print("Wine dataset")
-	SSE = kMeans(2, records, classes)
-	print("SSE:", SSE)
+	SS = kMeans(2, records, classes)
+	print("SSE:", SS[0])
+	print("SSB:", SS[1])
 
 #Open CSV file containing data set
 with open('TwoDimEasy.csv', "rt") as easy_data:
@@ -82,8 +109,10 @@ with open('TwoDimEasy.csv', "rt") as easy_data:
 	records = min_max.fit_transform(records)
 
 	print("Easy dataset")
-	SSE = kMeans(2, records, classes)
-	print("SSE:", SSE)
+	SS = kMeans(2, records, classes)
+	print("SSE:", SS[0])
+	print("SSB:", SS[1])
+
 
 #Open CSV file containing data set
 with open('TwoDimHard.csv', "rt") as hard_data:
@@ -100,5 +129,6 @@ with open('TwoDimHard.csv', "rt") as hard_data:
 	records = min_max.fit_transform(records)
 
 	print("Hard dataset")
-	SSE = kMeans(4, records, classes)
-	print("SSE:", SSE)
+	SS = kMeans(4, records, classes)
+	print("SSE:", SS[0])
+	print("SSB:", SS[1])
